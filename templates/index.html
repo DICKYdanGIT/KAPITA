@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
+    <script src="https://cdn.webix.com/edge/webix.js"></script>
+</head>
+
+<body>
+    <script>
+        webix.ready(function () {
+            webix.ui({
+                rows: [
+                    {},
+                    {
+                        cols: [
+                            {},
+                            {
+                                view: "form",
+                                id: "formLogin",
+                                width: 400,
+                                padding: 25,
+                                
+                                elements: [
+                                    {
+                                        template: "<h2 style='text-align:center'>Login</h2>",
+                                        height: 65,
+                                        borderless: true
+                                    },
+                                    {
+                                        view: "text",
+                                        name: "username",
+                                        label: "Username",
+                                        required: true
+                                    },
+                                    {
+                                        view: "text",
+                                        name: "password",
+                                        type: "password",
+                                        label: "Password",
+                                        required: true
+                                    },
+                                    {
+                                        margin: 10,
+                                        cols: [
+                                            {
+                                                view: "button",
+                                                value: "Login",
+                                                css: "webix_primary",
+                                                click: function () {
+                                                    const form = $$("formLogin");
+                                                    if (!form.validate()) {
+                                                        webix.message("Username dan password wajib diisi");
+                                                        return;
+                                                    }
+                                                    
+                                                    const data = form.getValues();
+
+                                                    webix.ajax()
+                                                        .headers({"Content-Type": "application/json"})
+                                                        .post("{{ url_for('auth.login') }}", JSON.stringify(data))
+                                                        .then(function (response) {
+                                                            const result = response.json();
+                                                            webix.message(result.message);
+
+                                                            if (result.redirect) {
+                                                                window.location.href = result.redirect;
+                                                            }
+                                                        })
+                                                        .fail(function (xhr) {
+                                                            let response;
+                                                            try {
+                                                                response = JSON.parse(xhr.responseText);
+                                                            } catch (e) {
+                                                                response = { error: "Terjadi kesalahan pada server" };
+                                                            }
+
+                                                            webix.message({
+                                                                type: "error",
+                                                                text: response.error || "Login gagal"
+                                                            });
+                                                        });
+                                                }
+                                            },
+                                            {
+                                                view: "button",
+                                                value: "Cancel",
+                                                click: function () {
+                                                    $$("formLogin").clear();
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {}
+                        ]
+                    },
+                    {}
+                ]
+            });
+        });
+    </script>
+</body>
+
+</html>

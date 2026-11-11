@@ -1,0 +1,42 @@
+Buat env
+
+python -m venv venv
+./venv/Scripts/activate
+
+install
+Flask
+pymongo
+python-dotenv
+-r requirements.txt
+
+
+@promo_blueprint.post("/create")
+def create_promo_route():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Data promo tidak valid"}), 400
+
+    promo_id = create_promo(data)
+
+    return (jsonify({"message": "Data Promo Berhasil Ditambahkan", "promo_id": str(promo_id)}),201,)
+    
+
+
+
+def create_promo(data):
+    collection = get_promo()
+
+    result = collection.insert_one({
+        "name": data["name"],
+        "code": data["code"],
+        "promo_category_id": data["promo_category_id"],
+        "buy": data["buy"],
+        "get": data["get"],
+        "period": data["period"],
+        "quantity": data["quantity"],
+        "stack": data["stack"],
+        "status": data["status"]
+    })
+
+    return result.inserted_id

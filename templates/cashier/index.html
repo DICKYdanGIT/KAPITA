@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashier</title>
+    <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
+    <script src="https://cdn.webix.com/edge/webix.js"></script>
+
+</head>
+
+<body style="background-color: pink;">
+    <script>
+        webix.ready(function () {
+            let availablePromos = [];
+            let selectedPromo = null;
+            webix.ui({
+                rows: [
+                    {
+                        view: "toolbar",
+                        elements: [
+                            {
+                                view: "label",
+                                label: "Aplikasi Kasir"
+                            },
+                            {
+                                view:"button", 
+                                value:"Logout",
+                                    click: function() {
+                                    fetch("/auth/logout", {
+                                        method: "POST",
+                                        headers: {
+                                            "Content-Type": "application/json"
+                                        }
+                                    })
+                                    .then(response => {
+                                        if (response.redirected) {
+                                            window.location.href = response.url;
+                                            return;
+                                        }
+
+                                        if (response.ok) {
+                                            window.location.href = "/auth/login";
+                                        } else {
+                                            webix.message("Gagal logout");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error(error);
+                                        webix.message("Terjadi kesalahan saat logout");
+                                    });
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        cols: [
+                            {
+                                view: "datatable",
+                                id: "tableProductCashier",
+                                url: "/product",
+                                columns: [
+                                    { id: "name", header: "Nama" },
+                                    { id: "price", header: "Harga" },
+                                    { id: "stock", header: "Stok" },
+                                    {
+                                        width: 100,
+                                        template: "<button class='webix_button btn-add-cart'>Tambah</button>"
+                                    },
+                                ],
+                                onClick: {
+                                    "btn-add-cart": function (e, id) {
+                                        const product = this.getItem(id);
+                                        addToCart(product);
+                                        return false;
+                                    }
+                                },
+                                autoheight: true,
+                                autowidth: true
+                            },
+                            {
+                                rows: [
+                                    {
+                                        view: "toolbar",
+                                        elements: [
+                                            {
+                                                view: "label",
+                                                label: "Keranjang"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        view: "datatable",
+                                        id: "tableCart",
+                                        columns: [
+                                            { id: "nameProductCart", header: "Nama" },
+                                            { id: "qtyProductCart", header: "Jumlah", },
+                                            { id: "priceProductCart", header: "Harga" },
+                                            { id: "subtotal", header: "Subtotal" },
+                                            {
+                                                width: 100,
+                                                template: "<button class='webix_button btn-min-product-cart'>-</button>",
+                                            },
+                                            {
+                                                width: 100,
+                                                template: "<button class='webix_button btn-plus-product-cart'>+</button>",
+                                            },
+                                        ],
+                                        onClick: {
+                                            "btn-min-product-cart": function (e, id) {
+                                                const item = this.getItem(id);
+                                                minQty(item);
+                                                return false;
+                                            },
+                                            "btn-plus-product-cart": function (e, id) {
+                                                const item = this.getItem(id);
+                                                plusQty(item);
+                                                return false;
+                                            }
+                                        },
+                                        autoheight: true,
+                                        autowidth: true
+                                    },
+                                    {
+                                        view: "select",
+                                        id: "promoSelect",
+                                        label: "Pilih Promo",
+                                        labelWidth: 100,
+                                        options: [
+                                            { id: "", value: "Tanpa Promo" }
+                                        ],
+                                        value: "",
+                                        on: {
+                                            onChange: function (value) {
+                                                applySelectedPromo();
+                                            }
+                                        }
+                                    },
+                                    {
+                                        view: "template",
+                                        id: "priceBeforePromo",
+                                        template: "Harga sebelum promo: Rp 0",
+                                        height: 35
+                                    },
+                                    {
+                                        view: "template",
+                                        id: "priceAfterPromo",
+                                        template: "Harga setelah promo: Rp 0",
+                                        height: 35
+                                    },
+                                    {
+                                        view: "text",
+                                        id: "moneyInp",
+                                        type: "number",
+                                        width: 200,
+                                        on: {
+                                            onTimedKeyPress: function () {
+                                                cashback();
+                                            }
+                                        }
+                                    },
+                                    {
+                                        view: "template",
+                                        id: "cashback",
+                                        template: "Kembalian: Rp 0",
+                                        autoheight: true
+                                    },
+                                    {
+                                        view: "button",
+                                        value: "Bayar",
+                                        css: "webix_primary",
+                                        inputWidth: 100,
+                                        click: function () {
+                                            const cart = $$("tableCart");
+                                            const cartData = [];
+
+                                            if (cart.count() === 0) {
+                                                webix.message({
+                                                    type: "error",
+                                                    text: "Keranjang masih kosong"
+                                                });
+                                                return;
+                                            }
+
+                                            cart.eachRow(function (id) {
+                                                const item = cart.getItem(id);
+
+                                                if (!item.isFree) {
+                                                    cartData.push({
+                                                        productId: item.productId,
+                                                        qty: item.qtyProductCart
+                                                    });
+                                                }
+                                            });
+
+                                            const uang = Number($$("moneyInp").getValue()) || 0;
+
+                                            if (!uang || uang <= 0) {
+                                                webix.message({
+                                                    type: "error",
+                                                    text: "Masukkan nominal pembayaran"
+                                                });
+                                                return;
+                                            }
+
+                                            kembalian = cashback();
+                                            if (kembalian < 0) {
+                                                webix.message({
+                                                    type: "error",
+                                                    text: "Uang pembayaran tidak mencukupi"
+                                                });
+                                                return;
+                                            }
+
+                                            const data = {
+                                                items: cartData,
+                                                payment_amount: uang,
+                                                promo_id: selectedPromo
+                                            };
+                                            console.log(data);
+
+                                            webix.ajax()
+                                                .headers({
+                                                    "Content-Type": "application/json"
+                                                })
+                                                .post("/transaction/", JSON.stringify(data))
+                                                .then(function (response) {
+                                                    const result = response.json();
+
+                                                    console.log(result);
+                                                    webix.message(result.message || "Transaksi berhasil");
+
+                                                    $$("tableProductCashier").clearAll();
+                                                    $$("tableProductCashier").load("/product");
+
+                                                }, function (error) {
+                                                    console.log("Status:", error.status);
+                                                    console.log("Response:", error.responseText);
+
+                                                    webix.message({
+                                                        type: "error",
+                                                        text: "Transaksi gagal: " + error.status
+                                                    });
+                                                });
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            });       
+            
+        function refreshPromo() {
+            const cart = $$("tableCart");
+            const items = [];
+
+            cart.eachRow(function (id) {
+                const item = cart.getItem(id);
+
+                if (!item.isFree) {
+                    items.push({
+                        product_id: item.productId,
+                        qty: item.qtyProductCart
+                    });
+                }
+            });
+
+            const freeIds = [];
+
+            cart.eachRow(function (id) {
+                const item = cart.getItem(id);
+
+                if (item.isFree) {
+                    freeIds.push(id);
+                }
+            });
+
+            freeIds.forEach(id => cart.remove(id));
+
+            if (items.length === 0) {
+                availablePromos = [];
+                selectedPromo = null;
+
+                $$("promoSelect").define("options", [
+                    { id: "", value: "Tanpa Promo" }
+                ]);
+
+                $$("promoSelect").refresh();
+                $$("promoSelect").setValue("");
+
+                updateTotal();
+                return;
+            }
+
+            webix.ajax()
+                .headers({
+                    "Content-Type": "application/json"
+                })
+                .post("/promo/check", JSON.stringify({
+                    items: items
+                }))
+                .then(function (response) {
+                    const result = response.json();
+
+                    availablePromos = result.promos || [];
+
+                    const options = [
+                        { id: "", value: "Tanpa Promo" }
+                    ];
+
+                    availablePromos.forEach(function (promo) {
+                        options.push({
+                            id: promo.promo_id,
+                            value: promo.name + " (" + promo.code + ")"
+                        });
+                    });
+
+                    $$("promoSelect").define("options", options);
+                    $$("promoSelect").refresh();
+
+                    const stillEligible = availablePromos.some(
+                        promo => promo.promo_id === selectedPromo
+                    );
+
+                    if (!stillEligible) {
+                        selectedPromo = null;
+                    }
+
+                    $$("promoSelect").setValue(selectedPromo || "");
+
+                    applySelectedPromo();
+                })
+                .catch(function (error) {
+                    console.log("Error promo:", error);
+                });
+        }
+
+        function addFreeProduct(product, quantity) {
+            $$("tableCart").add({
+                productId: product._id,
+                nameProductCart: product.name + " (GRATIS)",
+                qtyProductCart: quantity,
+                priceProductCart: 0,
+                subtotal: 0,
+                isFree: true
+            });
+        }
+
+        function addToCart(product) {
+            const cart = $$("tableCart");
+            const existing = cart.find(
+                item => item.productId === product._id
+            );
+
+            if (existing.length > 0) {
+                const item = existing[0];
+
+                item.qtyProductCart += 1;
+                item.subtotal = item.priceProductCart * item.qtyProductCart;
+
+                cart.updateItem(item.id, item);
+
+            } else {
+                cart.add({
+                    productId: product._id,
+                    nameProductCart: product.name,
+                    qtyProductCart: 1,
+                    priceProductCart: product.price,
+                    subtotal: product.price
+                });
+            }
+            updateTotal();
+            refreshPromo();
+        }
+
+        function minQty(item) {
+            if (item.qtyProductCart <= 1) {
+                $$("tableCart").remove(item.id);
+                updateTotal();
+                refreshPromo();
+                cashback()
+                return;
+            }
+            item.qtyProductCart -= 1;
+            item.subtotal = item.priceProductCart * item.qtyProductCart;
+            $$("tableCart").updateItem(item.id, item);
+            updateTotal();
+            refreshPromo();
+        }
+
+        function plusQty(item) {
+            item.qtyProductCart += 1;
+            item.subtotal = item.priceProductCart * item.qtyProductCart;
+            $$("tableCart").updateItem(item.id, item);
+            updateTotal();
+            refreshPromo();
+        }
+
+        function updateTotal() {
+            const cart = $$("tableCart");
+
+            let total = 0;
+
+            cart.eachRow(function (id) {
+                const item = cart.getItem(id);
+
+                item.subtotal = item.priceProductCart * item.qtyProductCart;
+
+                cart.updateItem(id, item);
+
+                if (!item.isFree) {
+                    total += item.subtotal;
+                }
+            });
+
+            const promo = availablePromos.find(
+                item => item.promo_id === selectedPromo
+            );
+
+            const discount = promo
+                ? Number(promo.benefit.discount_amount) || 0
+                : 0;
+
+            const finalTotal = Math.max(0, total - discount);
+
+            $$("priceBeforePromo").setHTML(
+                "Harga sebelum promo: Rp " + total.toLocaleString("id-ID")
+            );
+
+            $$("priceAfterPromo").setHTML(
+                "Harga setelah promo: Rp " + finalTotal.toLocaleString("id-ID")
+            );
+
+            cashback();
+
+            return finalTotal;
+        }
+
+        function cashback() {
+            const total = updateTotalWithoutCashback();
+            const uang = Number($$("moneyInp").getValue()) || 0;
+            const kembalian = uang - total;
+
+            if (kembalian < 0) {
+                $$("cashback").setHTML(
+                    "Uang Kurang: Rp " + Math.abs(kembalian).toLocaleString("id-ID")
+                );
+            } else {
+                $$("cashback").setHTML(
+                    "Kembalian: Rp " + kembalian.toLocaleString("id-ID")
+                );
+            }
+
+            return kembalian;
+        }
+
+        function updateTotalWithoutCashback() {
+            const cart = $$("tableCart");
+            let total = 0;
+
+            cart.eachRow(function (id) {
+                const item = cart.getItem(id);
+
+                if (!item.isFree) {
+                    total += item.priceProductCart * item.qtyProductCart;
+                }
+            });
+
+            const promo = availablePromos.find(
+                item => item.promo_id === selectedPromo
+            );
+
+            const discount = promo
+                ? Number(promo.benefit.discount_amount) || 0
+                : 0;
+
+            return Math.max(0, total - discount);
+        }
+
+        function applySelectedPromo() {
+            const promoId = $$("promoSelect").getValue();
+
+            selectedPromo = promoId || null;
+
+            const cart = $$("tableCart");
+
+            // Hapus produk gratis sebelumnya
+            const freeIds = [];
+
+            cart.eachRow(function (id) {
+                const item = cart.getItem(id);
+
+                if (item.isFree) {
+                    freeIds.push(id);
+                }
+            });
+
+            freeIds.forEach(id => cart.remove(id));
+
+            // Cari promo yang dipilih
+            const promo = availablePromos.find(
+                item => item.promo_id === selectedPromo
+            );
+
+            selectedPromo = promo ? promo.promo_id : null;
+
+            // Jika promo kategori 1, tambahkan produk gratis
+            if (promo && promo.promo_category_id === 1) {
+                promo.benefit.items.forEach(function (free) {
+                    const products = $$("tableProductCashier").find(
+                        item => String(item._id) === String(free.product_id)
+                    );
+
+                    if (products.length > 0) {
+                        addFreeProduct(products[0], free.quantity);
+                    }
+                });
+            }
+
+            updateTotal();
+        }
+
+        });
+    </script>
+</body>
+</html>

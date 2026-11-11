@@ -1,0 +1,184 @@
+aplikasi alfa
+
+invoasi !!!
+
+contoh tema(
+warehouse inventory
+POS
+supplier management (opsi)
+management promosi
+management karyawan
+finace - accounting (opsi)
+)
+
+pas persentasi 30 menit(
+alur di fokuskan ke fitur fitur penting -> agar tidak buang Waktu,
+
+
+)
+
+
+fokusin di 1 poin, jangan terlalu luas agar bisa lebih tajam
+
+
+security apliaksi, validasi dan sanitasi
+
+
+
+Average Cost -> untuk melihat keuntungan, per barang, akan berubah setiap barang masuk, karena ada kemungkinan beda harga
+DSI -> per barang
+SPD -> penjualan perharian
+AVC -> jumlah struk yang keluar / pelanggan
+
+cross margin
+
+
+
+database(
+harus ada database master = hanya bisa update, seperti menyimpan perubahan
+jadi nanati ada bebrpa database untuk CRUD
+
+data login bisa di catat, kapan, hari apa, siapa
+)
+
+
+bkl, branag kirima langsung ke toko, tidak melewati warehouse
+
+pikirkan dalam jangka panjang, bagimana contoh melakuakn update dari semua toko mislanya di indonesia
+
+coba brainstroming dulu
+
+
+
+--------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------
+
+
+ide 1
+warehouse,
+CRUD jelas
+
+kekurangan,
+- fitur autentikasi dan authorisasi
+
+fitur:
+CRUD Produk,
+log barang masuk dan keluar
+dashboard (jumlah produk, log, /laporan)
+pengiriman atau barang keluar
+
+
+--------------------------------------------------------------------
+
+
+ide 2
+Ecommerce,
+user= guest(tidak daftar akun), pengguna(sudah terdaftar)
+perbedaan= guest hanya melihat dan tidak bisa checkout, pengguna bisa
+CRUD agak samar
+
+fitur:
+ guest,
+  melihat produk
+
+ pengguna:
+  melihat produk,
+  menambahkan produk ke checkout,
+  mengedit produk di checkout,
+  menghapus produk di checkout,
+ 
+fitur tambahan/ optional:
+ cetak struk,
+ melakukan simulasi pembayaran,
+
+
+
+--------------------------------------------------------------------
+
+
+ide 3
+ecommerce dan Merchant
+user = pengguna, merchant
+perbedaan = merchant bisa membuat data untuk pengguna bisa membeli
+CRUD cukup jelas
+
+fitur:
+ user:
+  melihat produk,
+  menambahkan produk ke keranjang,
+  mengedit produk di keranjang,
+  menghapus produk di keranjang,
+
+ merchant:
+  menambahkan produk
+  menghapus produk
+  mengedit produk
+  melihat produk
+
+fitur tambahan/ optional:
+ cetak struk,
+ melakukan simulasi pembayaran,
+ (opstional) fitur diskon / promo
+
+
+
+--------------------------------------------------------------------
+
+
+
+ide 4 pakai yang ini ya !!!!!
+POS,
+user = kasir dan admin
+kasir untuk melakukan transaksi ke pelanggan
+admin untuk CRUD barang, melihat log, transaksi, keuangan dengan menggunakan average cost dll, fitur diskon dan promo
+*note ini cakupan untuk 1 toko
+
+fitur:
+ kasir:
+  melihat produk,
+  menambahkan produk ke keranjang checkout,
+  mengedit produk di keranjang checkout,
+  menghapus produk di keranjang checkout,
+
+ admin ketua toko:
+  menambahkan produk
+  menghapus produk
+  mengedit produk
+  melihat produk
+  melihat log (dashboard)
+  keuangan (dashboard)
+  management fitur diskon / promo (penggantinya data dummy diskon/ promo) -> bisa memilih produk mana yang terkena diskon
+
+fitur tambahan/ optional:
+ cetak struk,
+ melakukan simulasi pembayaran,
+
+promo member
+
+*note 
+ini harus diperhatikan diskonnya agar input dan ouputnya bisa dinamis, 
+perbedaan bentuk atau format setiap diskon atau promo, menjadi masalah Utama dari kondisi ini
+
+semisalnya ada diskon 40% dan promo beli 10 gratis 1
+perbedaan variable ini menjadi masalah
+
+bagaimana cara untuk memproteksi input perbedaan variable ini ?
+bagaiaman cara untuk membuat proteksi ini menjadi dinamis untuk setiap bentuk diskon dan promo?
+ 
+
+username / password:
+jangan langusng di dalam scriptnya
+
+menggunakan environment variable
+atau 
+secret manager
+
+
+promo pakai sistem trigger = beli 3 produk a dapat 1 produk b,  jadi fokusnya di keranjang 
+atau menggunakan code untuk mengakses "promo mana"
+
+keranjang menjadi 1 focus Utama
+
+
+data master (product)

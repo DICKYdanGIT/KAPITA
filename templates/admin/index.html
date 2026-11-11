@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
+    <script src="https://cdn.webix.com/edge/webix.js"></script>
+
+</head>
+
+<body style="background-color: pink;">
+    <script src="/static/admin/product.js"></script>
+    <script src="/static/admin/promo.js"></script>
+    <script src="/static/admin/dashboard.js"></script>
+    <script>
+        webix.ready(function () {
+            webix.ui({
+                cols: [{
+                    view: "sidebar",
+                    id: "adminSidebar",
+                    width: 220,
+                    data: [
+                        { id: "dashboard", value: "Dashboard" },
+                        { id: "promo", value: "Promo" },
+                        { id: "product", value: "Produk" },
+                        { id: "transaction", value: "Transaksi" },
+                        { id: "logout", value: "Logout" }
+                    ],
+
+                    on: {
+                        onAfterSelect: function (id) {
+                            if (id === "logout") {
+                                fetch("/auth/logout", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json"
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.redirected) {
+                                        window.location.href = response.url;
+                                    } else if (response.ok) {
+                                        window.location.href = "/auth/login";
+                                    } else {
+                                        webix.message("Gagal logout");
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                    webix.message("Terjadi kesalahan saat logout");
+                                });
+
+                                return;
+                            }
+
+                            $$("dashboardContent").hide();
+                            $$("promoContent").hide();
+                            $$("productContent").hide();
+                            $$("transactionContent").hide();
+
+                            $$(id + "Content").show();
+                        }
+                    }
+                },
+
+                    {
+                        view: "multiview",
+                        animate: false,
+                        cells: [
+                            dashboardContent(),
+                            promoContent(),
+                            productContent(),
+                            {
+                                id: "transactionContent",
+                                template: "<h2>transaction</h2>"
+                            },
+
+                        ]
+                    }
+                ]
+            });
+            webix.ui(promoDetailWindow());
+            webix.ui(promoForm());
+
+            webix.ui(productForm());
+        });
+    </script>
+</body>
+</html>
