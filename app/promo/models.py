@@ -1,5 +1,6 @@
 from flask import current_app
-from datetime import datetime
+
+from datetime import datetime, timezone
 from bson import ObjectId
 
 
@@ -151,7 +152,7 @@ def check_promo(cart_items):
                     get.get("max_discount", 0),
                 )
             else:
-                discount_amount = get.get("discount", 0)
+                discount_amount = get.get("discount-cut", 0)
 
         else:
             continue
@@ -172,3 +173,61 @@ def check_promo(cart_items):
         )
 
     return promo_list
+
+
+def get_promo_true():
+    promos = get_all_promo()
+
+    return [
+        promo for promo in promos
+        if promo.get("status") is True
+    ]
+
+
+def get_total_promo():
+    collection = get_promo()
+
+    return collection.count_documents({})
+
+
+def get_total_promo_quota():
+    collection = get_promo()
+
+    result = collection.aggregate([
+        {
+            "$group": {
+                "_id": None,
+                "total_quota": {
+                    "$sum": "$quantity"
+                }
+            }
+        }
+    ])
+
+    data = next(result, None)
+
+    if data is None:
+        return 0
+
+    return data["total_quota"]
+
+
+def get_expired_promos():
+    collection = get_promo()
+
+    now = datetime.now(timezone.utc)
+
+    return collection.count_documents({
+        "$or": [
+            {
+                "quantity": {"$lte": 0}
+            },
+            {
+                "period.end": {"$lt": now}
+            }
+        ]
+    })
+
+def get_total_promo_true():
+    promos = get_promo_true()
+    return len(promos)

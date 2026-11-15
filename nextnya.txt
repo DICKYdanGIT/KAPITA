@@ -1,39 +1,17 @@
 
-1.
-stack promo
 
-2. Admin
-CRUD promo{
-    perlu di limit input diskon, dan total minimalnya agar tidak rugi / minus
-}
-CRUD product
-report Keuangan
-report transaksi
-
-dashboard {
-    log CRUD
-    transaksi harian
+Session{
+    benerin session dan proteksi (session, bagian session aksesnya (jangan memunculkan jsonny))
+    errro message dibuat merata (khususnya webix ajax)
 }
 
+testing
 
-3.
-benerin session dan proteksi (session, bagian session aksesnya (jangan memunculkan jsonny))
-
-4.
-buat db login report
-
-5.
-benerin UI + resposive 
+UI/UX[
+    color pallete
+    benerin UI
+    resposive (optional) 
+]
 
 
 cozfre
-
-
-target hari ini 
-CRUD product dan promo
-optional, dashboard admin
-
-CRUD promo => harus ada validasi jika tidak saling tabrakan
-
-keranjang di simpan di session / database agar ketika di refresh tidka hilang
-bisa di tayain soal keranjang

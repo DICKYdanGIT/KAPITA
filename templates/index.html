@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
+    <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.webix.com/edge/webix.js"></script>
 </head>
 
@@ -61,7 +62,7 @@
 
                                                     webix.ajax()
                                                         .headers({"Content-Type": "application/json"})
-                                                        .post("{{ url_for('auth.login') }}", JSON.stringify(data))
+                                                        .post("/auth/login", JSON.stringify(data))
                                                         .then(function (response) {
                                                             const result = response.json();
                                                             webix.message(result.message);
@@ -70,17 +71,19 @@
                                                                 window.location.href = result.redirect;
                                                             }
                                                         })
-                                                        .fail(function (xhr) {
-                                                            let response;
+                                                        .catch(function(error) {
+                                                            console.error("Login error:", error);
+
+                                                            let data = {};
+
                                                             try {
-                                                                response = JSON.parse(xhr.responseText);
+                                                                data = JSON.parse(error.responseText);
                                                             } catch (e) {
-                                                                response = { error: "Terjadi kesalahan pada server" };
                                                             }
 
                                                             webix.message({
                                                                 type: "error",
-                                                                text: response.error || "Login gagal"
+                                                                text: data.error || "Gagal menghubungi server"
                                                             });
                                                         });
                                                 }

@@ -6,4 +6,4 @@ from app.auth.decorator import login_required, role_required
 @login_required
 @role_required("admin")
 def dashboard():
-        return render_template("admin/index.html")
+    return render_template("admin/index.html")

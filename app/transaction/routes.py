@@ -1,139 +1,195 @@
 from flask import request, jsonify, session
 from datetime import datetime
-from bson import ObjectId
-from bson.errors import InvalidId
 
 from app.transaction import transaction_blueprint
-from app.transaction.models import save_transaction
-from app.product.models import get_product, min_product
-from app.promo.models import check_promo, use_promo_ticket
+from app.transaction.models import(
+    save_transaction, 
+    get_all_transactions, 
+    get_total_sales, 
+    calculate, 
+    get_total_transactions, 
+    get_daily_sales, 
+    get_best_products, 
+    get_best_promos,
+    get_total_discount,
+    get_average_purchase
+)
+from app.product.models import min_product
+from app.promo.models import use_promo_ticket
+from app.auth.decorator import login_required, role_required
 
 
 @transaction_blueprint.post("/")
-def create_transaction():
+@login_required
+@role_required("cashier", "admin")
+def transaction_cart():
     data = request.get_json()
-    items = data.get("items")
 
-    if not isinstance(items, list) or not items:
-        return jsonify({"error": "Data produk tidak valid"}), 400
+    if not isinstance(data, dict):
+        return jsonify({"error": "Data tidak valid"}), 400
 
-    products = get_product()
-    transaction_items = []
-    total = 0
+    result = calculate(data)
 
-    for item in items:
-        id_product = item.get("productId")
-        qty = item.get("qty")
+    if result is False:
+        return jsonify({"error": "Data tidak valid"}), 400
 
-        if not id_product or type(qty) is not int or qty <= 0:
-            return jsonify({"error": "Data produk atau jumlah tidak valid"}), 400
+    if not result["items"]:
+        return jsonify({"error": "Keranjang kosong"}), 400
 
-        try:
-            product = products.find_one({"_id": ObjectId(id_product)})
-        except (InvalidId, TypeError):
-            return jsonify({"error": "ID produk tidak valid"}), 400
+    if not result["promo_valid"]:
+        return jsonify({"error": "Promo tidak valid"}), 400
 
-        if not product:
-            return jsonify({"error": "Produk tidak ditemukan"}), 404
+    cash = data.get("cash", 0)
 
-        if qty > product.get("stock", 0):
-            return jsonify({"error": f"Stok {product['name']} tidak mencukupi"}), 400
+    if type(cash) not in (int, float) or cash < result["total"]:
+        return jsonify({"error": "Uang pembayaran tidak cukup"}), 400
 
-        price = product["price"]
-        subtotal = price * qty
-        total += subtotal
-
-        transaction_items.append(
-            {
-                "product_id": str(product["_id"]),
-                "name": product["name"],
-                "price": price,
-                "qty": qty,
-                "subtotal": subtotal,
-            }
+    for item in result["items"]:
+        success = min_product(
+            item["product_id"],
+            item["qty"]
         )
 
-    cart_items = [
-        {"product_id": item["product_id"], "qty": item["qty"], "price": item["price"]}
-        for item in transaction_items
-    ]
-
-    promos = check_promo(cart_items)
-    selected_promo_id = data.get("promo_id")
-
-    promos = [
-        promo for promo in promos
-        if promo["promo_id"] == selected_promo_id
-    ]
-
-    for promo in promos:
-        for free in promo["benefit"]["items"]:
-            id_product = free["product_id"]
-            qty = free["quantity"]
-
-            product = products.find_one({"_id": ObjectId(id_product)})
-
-            if not product:
-                return jsonify({"error": "Produk gratis tidak ditemukan"}), 404
-
-            if qty > product.get("stock", 0):
-                return (
-                    jsonify(
-                        {
-                            "error": f"Stok produk gratis {product['name']} tidak mencukupi"
-                        }
-                    ),
-                    400,
-                )
-
-            transaction_items.append(
-                {
-                    "product_id": str(product["_id"]),
-                    "name": product["name"] + " (GRATIS)",
-                    "price": 0,
-                    "qty": qty,
-                    "subtotal": 0,
-                }
-            )
-
-    total_discount = sum(promo["benefit"]["discount_amount"] for promo in promos)
-    final_total = total - total_discount
-
-    payment_amount = data.get("payment_amount", 0)
-    if type(payment_amount) not in (int, float) or payment_amount < final_total:
-        return jsonify({"error": "Uang pembayaran tidak mencukupi"}), 400
-
-    for promo in promos:
-        success = use_promo_ticket(promo["promo_id"])
         if not success:
-            return jsonify({"error": "Tiket promo sudah habis atau tidak tersedia"}), 400
-            
-    for item in transaction_items:
-        success = min_product(item["product_id"], item["qty"])
+            return jsonify({
+                "error": "Stok produk tidak mencukupi"
+            }), 400
+
+    promo_id = data.get("promo_id")
+
+    if promo_id:
+        success = use_promo_ticket(promo_id)
+
         if not success:
-            return jsonify({"error": f"Gagal mengurangi stok {item['name']}"}), 400
+            return jsonify({
+                "error": "Kuota promo sudah habis"
+            }), 400
+
+    change = cash - result["total"]
 
     transaction = {
         "cashier_id": session.get("user_id"),
-        "items": transaction_items,
-        "total": total,
-        "total_discount": total_discount,
-        "final_total": final_total,
-        "promos": promos,
-        "created_at": datetime.now(),
+        "items": result["items"],
+        "total": result["subtotal"],
+        "total_discount": result["discount_amount"],
+        "final_total": result["total"],
+        "cash": cash,
+        "change": change,
+        "promos": [
+            promo for promo in result["promos"]
+            if promo["promo_id"] == promo_id
+        ] if promo_id else [],
+        "created_at": datetime.now()
     }
 
     transaction_id = save_transaction(transaction)
-    
+
     return (
-        jsonify(
-            {
-                "message": "Pembayaran Berhasil",
-                "transaction_id": str(transaction_id),
-                "total": total,
-                "total_discount": total_discount,
-                "final_total": final_total,
-            }
-        ),
-        201,
+        jsonify({
+            "message": "Pembayaran Berhasil",
+            "transaction_id": str(transaction_id),
+            "total": result["subtotal"],
+            "total_discount": result["discount_amount"],
+            "final_total": result["total"]
+        }),
+        201
     )
+
+@transaction_blueprint.post("/calculate")
+@login_required
+@role_required("cashier", "admin")
+def calculate_cart():
+    data = request.get_json()
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Data tidak valid"}), 400
+
+    result = calculate(data)
+
+    if result is False:
+        return jsonify({"error": "Data tidak valid"}), 400
+
+    return jsonify(result), 200
+
+
+@transaction_blueprint.get("/data")
+@login_required
+@role_required("admin")
+def get_transactions():
+    transactions = get_all_transactions()
+
+    for transaction in transactions:
+        transaction["_id"] = str(transaction["_id"])
+
+        if transaction.get("cashier_id") is not None:
+            transaction["cashier_id"] = str(transaction["cashier_id"])
+
+        if transaction.get("created_at"):
+            transaction["created_at"] = transaction["created_at"].strftime(
+                "%d-%m-%Y %H:%M:%S"
+            )
+
+    return jsonify(transactions), 200
+
+
+@transaction_blueprint.get("/total-sales")
+@login_required
+@role_required("admin")
+def total_sales():
+    total = get_total_sales()
+
+    return jsonify({
+        "total_sales": total
+    }), 200
+
+
+@transaction_blueprint.get("/total-transactions")
+@login_required
+@role_required("admin")
+def total_transactions():
+    total = get_total_transactions()
+
+    return jsonify({
+        "total_transactions": total
+    }), 200
+
+
+@transaction_blueprint.get("/daily-sales")
+@login_required
+@role_required("admin")
+def daily_sales():
+    sales = get_daily_sales()
+    return jsonify(sales), 200
+
+
+@transaction_blueprint.get("/best-products")
+@login_required
+@role_required("admin")
+def best_products():
+    products = get_best_products()
+    return jsonify(products), 200
+
+
+@transaction_blueprint.get("/best-promos")
+@login_required
+@role_required("admin")
+def best_promos():
+    promos = get_best_promos()
+    return jsonify(promos), 200
+
+
+@transaction_blueprint.get("/total-discount")
+@login_required
+@role_required("admin")
+def total_discount():
+    return jsonify({
+        "total_discount": get_total_discount()
+    })
+
+@transaction_blueprint.get("/average-purchase")
+@login_required
+@role_required("admin")
+def average_purchase():
+    return jsonify({
+        "average_purchase": get_average_purchase()
+    })

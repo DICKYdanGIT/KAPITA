@@ -6,14 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin</title>
     <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
+    <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.webix.com/edge/webix.js"></script>
 
 </head>
 
 <body style="background-color: pink;">
+    <script src="/static/protection.js"></script>
     <script src="/static/admin/product.js"></script>
     <script src="/static/admin/promo.js"></script>
+    <script src="/static/admin/transaction.js"></script>
     <script src="/static/admin/dashboard.js"></script>
+    <script src="/static/component.js"></script>
+    
     <script>
         webix.ready(function () {
             webix.ui({
@@ -47,10 +52,7 @@
                                         webix.message("Gagal logout");
                                     }
                                 })
-                                .catch(error => {
-                                    console.error(error);
-                                    webix.message("Terjadi kesalahan saat logout");
-                                });
+                                .catch(handleAjaxError);
 
                                 return;
                             }
@@ -72,19 +74,19 @@
                             dashboardContent(),
                             promoContent(),
                             productContent(),
-                            {
-                                id: "transactionContent",
-                                template: "<h2>transaction</h2>"
-                            },
-
+                            transactionContent(),
                         ]
                     }
                 ]
             });
             webix.ui(promoDetailWindow());
-            webix.ui(promoForm());
+            webix.ui(transactionDetailWindow());
 
-            webix.ui(productForm());
+            
+            dashboardFunc();
+            productFunc();
+            transactionFunc();
+            promoFunc();
         });
     </script>
 </body>
