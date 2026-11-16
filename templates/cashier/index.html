@@ -68,9 +68,12 @@
                     }
                 ]
             });
+            
 
             webix.ui(cartWindow());
             webix.ui(promoContentWindow());
+
+            $$("cashierSidebar").select("cashier");
         });
 
         function logout() {
