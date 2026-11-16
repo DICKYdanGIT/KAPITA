@@ -1,27 +1,22 @@
 :root {
     --font: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
-    /* warna utama - royal purple */
     --c-primary: #49345F;
     --c-primary-hover: #634B78;
     --c-primary-soft: #EAE2EF;
     --c-on-primary: #FFFFFF;
 
-    /* aksen emas pudar */
     --c-accent: #B9A477;
     --c-accent-hover: #A58E60;
     --c-accent-soft: #F2EDE1;
     --c-on-accent: #30263A;
 
-    /* permukaan */
     --c-bg: #F5F3F6;
     --c-surface: #FFFFFF;
     --c-border: #E3DDE7;
 
-    /* teks */
     --c-text: #30263A;
     --c-muted: #82798A;
 
-    /* status */
     --c-danger: #BE4B50;
     --c-danger-soft: #F9E8E9;
 
@@ -31,15 +26,13 @@
     --c-success: #56816C;
     --c-success-soft: #E6F0E9;
 
-    /* sidebar */
     --c-sidebar-bg: #30243D;
     --c-sidebar-text: #C5B9CD;
+    --c-sidebar-hover-text: #f9efff;
     --c-sidebar-hover-bg: #40304F;
     --c-sidebar-active-bg: #59436C;
     --c-sidebar-active-text: #FFFFFF;
 
-
-    /* bentuk */
     --radius: 10px;
     --radius-sm: 6px;
     --shadow: 0 1px 2px rgba(17, 32, 29, .06);
@@ -139,7 +132,7 @@ html, body {
 }
 
 .app-sidebar .webix_tree_item {
-    color: var(--c-sidebar-text);
+    color: var(--c-sidebar-text) !important;
     border-radius: var(--radius-sm);
     margin: 2px 8px;
     transition: background .15s;
@@ -147,13 +140,8 @@ html, body {
 
 .app-sidebar .webix_tree_item:hover {
     background: var(--c-sidebar-hover-bg);
+    color: var(--c-sidebar-hover-text) !important;
 }
-
-.app-sidebar .webix_tree_item.webix_selected {
-    background: var(--c-sidebar-active-bg);
-    color: var(--c-sidebar-active-text);
-}
-
 
 .product-count {
     color: var(--c-muted);
