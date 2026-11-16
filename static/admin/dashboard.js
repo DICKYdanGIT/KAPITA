@@ -4,212 +4,175 @@ function dashboardContent() {
         rows: [
             {
                 view: "toolbar",
+                css: "cart-title",
                 height: 56,
-                css: "webix_header",
                 cols: [
-                    {
-                        view: "label",
-                        label: "Dashboard"
-                    }
+                    { view: "label", label: "Dashboard" }
                 ]
             },
 
             {
-                padding: 22,
+                css: "cashier-main",
+                padding: 20,
+                margin: 14,
                 rows: [
                     {
+                        height: 110,
+                        margin: 14,
                         cols: [
                             {
-                                id: "totalSales",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">Total Penjualan</div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">--</div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">-</div>
-                                    </div>
-                                `
+                                id: "totalSales", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Penjualan</div><div class="stat-value small">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "totalTransactions",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">Total Transaksi</div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">--</div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">-</div>
-                                    </div>
-                                `
+                                id: "totalTransactions", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Transaksi</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "totalProducts",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">Total Produk</div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">--</div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">-</div>
-                                    </div>
-                                `
+                                id: "totalProducts", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Produk</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "totalPromos",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">Total Promo</div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">--</div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">-</div>
-                                    </div>
-                                `
+                                id: "totalPromos", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Promo</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             }
                         ]
                     },
 
-                    { height: 22 },
-
                     {
-                        view: "template",
-                        template: "<h3 style='margin:0;'>Grafik Penjualan Harian</h3>",
-                        height: 40,
-                        borderless: true
-                    },
-
-                    {
-                        view: "chart",
-                        id: "dashboardSalesChart",
-                        type: "bar",
-                        height: 280,
-                        padding: {
-                            left: 100,
-                            top: 30
-                        },
-
-                        xAxis: {
-                            template: "#day#"
-                        },
-
-                        yAxis: {
-                            start: 0,
-                        },
-
-                        legend: {
-                            values: [
-                                {
-                                    text: "Penjualan Harian",
-                                    color: "#e776e1"
-                                }
-                            ],
-                            valign: "middle",
-                            align: "right",
-                            width: 100,
-                            layout: "y"
-                        },
-
-                        eventRadius: 5,
-
-                        series: [
+                        css: "panel-card",
+                        padding: 16,
+                        margin: 8,
+                        gravity: 1.5,
+                        minHeight: 260,
+                        rows: [
                             {
-                                alpha: 0.7,
-                                value: "#total#",
-                                color: "#e776e1",
-                                tooltip: {
-                                    template: function(obj) {
-                                        return "Penjualan: Rp " +
-                                            Number(obj.total || 0).toLocaleString("id-ID");
-                                    }
-                                }
-                            }
-                        ],
+                                view: "template",
+                                css: "panel-head",
+                                borderless: true,
+                                height: 32,
+                                template: "<div class='panel-title'>Grafik Penjualan Harian</div>"
+                            },
+                            {
+                                view: "chart",
+                                id: "dashboardSalesChart",
+                                type: "bar",
+                                borderless: true,
+                                barWidth: 36,
+                                padding: {
+                                    left: 80,
+                                    right: 20,
+                                    top: 20,
+                                    bottom: 40
+                                },
 
-                        data: []
+                                xAxis: {
+                                    template: "#day#"
+                                },
+
+                                yAxis: {
+                                    start: 0,
+                                    template: function(value) {
+                                        return Number(value).toLocaleString("id-ID");
+                                    }
+                                },
+
+                                eventRadius: 5,
+
+                                series: [
+                                    {
+                                        alpha: 0.9,
+                                        value: "#total#",
+                                        color: "#49345F",
+                                        tooltip: {
+                                            template: function(obj) {
+                                                return "Penjualan: Rp " +
+                                                    Number(obj.total || 0).toLocaleString("id-ID");
+                                            }
+                                        }
+                                    }
+                                ],
+
+                                data: []
+                            }
+                        ]
                     },
 
-                    { height: 22 },
-
                     {
-                        height: 210,
+                        gravity: 1,
+                        minHeight: 230,
+                        margin: 14,
                         cols: [
                             {
+                                css: "panel-card",
+                                padding: 16,
+                                margin: 8,
                                 rows: [
                                     {
                                         view: "template",
-                                        template: "<h4 style='padding:10px 0px; margin:0;'>Produk Terlaris</h4>",
-                                        height: 50,
-                                        borderless: true
+                                        css: "panel-head",
+                                        borderless: true,
+                                        height: 32,
+                                        template: "<div class='panel-title'>Produk Terlaris</div>"
                                     },
-
                                     {
                                         view: "list",
                                         id: "bestProducts",
-                                        scroll: false,
-                                        height: 180,
+                                        css: "rank-list",
+                                        borderless: true,
+                                        scroll: "y",
+                                        select: false,
+                                        type: {
+                                            height: 52
+                                        },
                                         template: `
-                                            <div style="padding:5px 15px; display:flex; justify-content:space-between; align-items:center;">
-                                                <span style="color:#334155;">
-                                                    #name#
-                                                </span>
-                                                <span style="color:#64748b;">
-                                                    #total_sold# terjual
-                                                </span>
+                                            <div class="rank-row">
+                                                <span class="rank-name">#name#</span>
+                                                <span class="rank-meta">#total_sold# terjual</span>
                                             </div>
                                         `,
-                                        type: {
-                                            height: 55
-                                        },
                                         url: "/transaction/best-products"
                                     }
                                 ]
                             },
+
                             {
-                                width: 22,
-                            },
-                            {
+                                css: "panel-card",
+                                padding: 16,
+                                margin: 8,
                                 rows: [
                                     {
                                         view: "template",
-                                        template: "<h4 style='padding:10px 0px; margin:0;'>Promo Terlaris</h4>",
-                                        height: 50,
-                                        borderless: true
+                                        css: "panel-head",
+                                        borderless: true,
+                                        height: 32,
+                                        template: "<div class='panel-title'>Promo Terlaris</div>"
                                     },
-
                                     {
                                         view: "list",
                                         id: "bestPromos",
-                                        scroll: false,
-                                        height: 180,
+                                        css: "rank-list",
+                                        borderless: true,
+                                        scroll: "y",
+                                        select: false,
+                                        type: {
+                                            height: 52
+                                        },
                                         template: `
-                                            <div style="padding:12px 15px; display:flex; justify-content:space-between; align-items:center;">
+                                            <div class="rank-row">
                                                 <div>
-                                                    <div style="font-weight:600; color:#334155;">
-                                                        #name#
-                                                    </div>
-                                                    <div style="font-size:12px; color:#64748b;">
-                                                        #code#
-                                                    </div>
+                                                    <div class="rank-name">#name#</div>
+                                                    <div class="rank-sub">#code#</div>
                                                 </div>
-                                                <span style="color:#64748b;">
-                                                    #total_used# kali digunakan
-                                                </span>
+                                                <span class="rank-meta">#total_used# kali digunakan</span>
                                             </div>
                                         `,
-                                        type: {
-                                            height: 55
-                                        },
-                                        url: "/transaction//best-promos"
+                                        url: "/transaction/best-promos"
                                     }
                                 ]
-                            },
+                            }
                         ]
-                    },
+                    }
                 ]
             }
         ]

@@ -1,72 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
+    <title>Cozfre - Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/admin.css">
     <script src="https://cdn.webix.com/edge/webix.js"></script>
-
 </head>
 
-<body style="background-color: pink;">
+<body>
     <script src="/static/protection.js"></script>
     <script src="/static/admin/product.js"></script>
     <script src="/static/admin/promo.js"></script>
     <script src="/static/admin/transaction.js"></script>
     <script src="/static/admin/dashboard.js"></script>
     <script src="/static/component.js"></script>
-    
+
     <script>
         webix.ready(function () {
             webix.ui({
-                cols: [{
-                    view: "sidebar",
-                    id: "adminSidebar",
-                    width: 220,
-                    data: [
-                        { id: "dashboard", value: "Dashboard" },
-                        { id: "promo", value: "Promo" },
-                        { id: "product", value: "Produk" },
-                        { id: "transaction", value: "Transaksi" },
-                        { id: "logout", value: "Logout" }
-                    ],
-
-                    on: {
-                        onAfterSelect: function (id) {
-                            if (id === "logout") {
-                                fetch("/auth/logout", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json"
+                id: "app",
+                css: "app-root",
+                cols: [
+                    {
+                        width: 220,
+                        rows: [
+                            {
+                                view: "template",
+                                css: "app-brand",
+                                borderless: true,
+                                height: 64,
+                                template: "Cozfre"
+                            },
+                            {
+                                view: "sidebar",
+                                id: "adminSidebar",
+                                css: "app-sidebar",
+                                data: [
+                                    { id: "dashboard", value: "Dashboard", icon: "mdi mdi-view-dashboard-outline" },
+                                    { id: "promo", value: "Promo", icon: "mdi mdi-tag-outline" },
+                                    { id: "product", value: "Produk", icon: "mdi mdi-package-variant-closed" },
+                                    { id: "transaction", value: "Transaksi", icon: "mdi mdi-receipt" },
+                                    { id: "logout", value: "Logout", icon: "mdi mdi-logout" }
+                                ],
+                                on: {
+                                    onAfterSelect: function (id) {
+                                        if (id === "logout") return logout();
+                                        $$(id + "Content").show();
                                     }
-                                })
-                                .then(response => {
-                                    if (response.redirected) {
-                                        window.location.href = response.url;
-                                    } else if (response.ok) {
-                                        window.location.href = "/auth/login";
-                                    } else {
-                                        webix.message("Gagal logout");
-                                    }
-                                })
-                                .catch(handleAjaxError);
-
-                                return;
+                                }
                             }
-
-                            $$("dashboardContent").hide();
-                            $$("promoContent").hide();
-                            $$("productContent").hide();
-                            $$("transactionContent").hide();
-
-                            $$(id + "Content").show();
-                        }
-                    }
-                },
-
+                        ]
+                    },
                     {
                         view: "multiview",
                         animate: false,
@@ -74,20 +65,41 @@
                             dashboardContent(),
                             promoContent(),
                             productContent(),
-                            transactionContent(),
+                            transactionContent()
                         ]
                     }
                 ]
             });
+
             webix.ui(promoDetailWindow());
             webix.ui(transactionDetailWindow());
 
-            
+            $$("adminSidebar").select("dashboard");
+
             dashboardFunc();
             productFunc();
             transactionFunc();
             promoFunc();
         });
+
+        function logout() {
+            fetch("/auth/logout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
+                    window.location.href = "/auth/login";
+                } else {
+                    webix.message("Gagal logout");
+                }
+            })
+            .catch(handleAjaxError);
+        }
+
     </script>
 </body>
+
 </html>

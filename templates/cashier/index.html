@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cashier</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.webix.com/edge/webix.js"></script>
-
 </head>
 
-<body style="background-color: pink;">
+<body>
     <script src="/static/protection.js"></script>
     <script src="/static/cashier/cashier.js"></script>
     <script src="/static/cashier/cart.js"></script>
@@ -19,72 +21,78 @@
     <script>
         webix.ready(function () {
             webix.ui({
-                cols: [{
-                    view: "sidebar",
-                    id: "cashierSidebar",
-                    width: 220,
-                    data: [
-                        { id: "cashier", value: "Kasir" },
-                        { id: "promo", value: "Promo" },
-                        { id: "logout", value: "Logout" }
-                    ],
-
-                    on: {
-                        onAfterSelect: function (id) {
-                            if (id === "logout") {
-                                fetch("/auth/logout", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json"
+                id: "app",
+                css: "app-root",
+                cols: [
+                    {
+                        rows: [
+                            {
+                                view: "template",
+                                css: "app-brand",
+                                borderless: true,
+                                height: 64,
+                                template: "Cozfre"
+                            },
+                            {
+                                view: "sidebar",
+                                id: "cashierSidebar",
+                                css: "app-sidebar",
+                                width: 220,
+                                data: [
+                                    { id: "cashier", value: "Kasir", icon: "mdi mdi-cash-register" },
+                                    { id: "promo", value: "Promo", icon: "mdi mdi-tag-outline" },
+                                    { id: "logout", value: "Logout", icon: "mdi mdi-logout" }
+                                ],
+                                on: {
+                                    onAfterSelect: function (id) {
+                                        if (id === "logout") return logout();
+                                        if (id === "promo") return $$("promoContentWindow").show();
+                                        if (id === "cashier") return $$("promoContentWindow").hide();
                                     }
-                                })
-                                .then(response => {
-                                    if (response.redirected) {
-                                        window.location.href = response.url;
-                                    } else if (response.ok) {
-                                        window.location.href = "/auth/login";
-                                    } else {
-                                        webix.message("Gagal logout");
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error(error);
-                                    webix.message("Terjadi kesalahan saat logout");
-                                })
-
-                                return;
+                                }
+                            },
+                        ]
+                    },
+                    {
+                        view: "multiview",
+                        animate: false,
+                        cells: [
+                            {
+                                id: "cashierContent",
+                                cols: [
+                                    cashierContent(),
+                                    cartContent()
+                                ]
                             }
-
-                        if (id === "promo") {
-                            $$("promoContentWindow").show();
-                            return;
-                        }
-
-                        if (id === "cashier") {
-                            $$("promoContentWindow").hide();
-                            return;
-                        }
-                        }
+                        ]
                     }
-                },
-                {
-                    view: "multiview",
-                    animate: false,
-                    cells: [
-                        {
-                            id: "cashierContent",
-                            cols: [
-                                cashierContent(),
-                                cartContent()
-                            ]
-                        }
-                    ]
-                }
                 ]
             });
+
             webix.ui(cartWindow());
             webix.ui(promoContentWindow());
         });
+
+        function logout() {
+            fetch("/auth/logout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
+                    window.location.href = "/auth/login";
+                } else {
+                    webix.message("Gagal logout");
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                webix.message("Terjadi kesalahan saat logout");
+            });
+        }
     </script>
 </body>
+
 </html>

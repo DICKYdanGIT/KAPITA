@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdn.webix.com/edge/webix.css">
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.webix.com/edge/webix.js"></script>
@@ -12,8 +14,46 @@
 
 <body>
     <script>
+        function doLogin() {
+            const form = $$("formLogin");
+
+            if (!form.validate()) {
+                webix.message("Username dan password wajib diisi");
+                return;
+            }
+
+            const data = form.getValues();
+
+            webix.ajax()
+                .headers({ "Content-Type": "application/json" })
+                .post("/auth/login", JSON.stringify(data))
+                .then(function (response) {
+                    const result = response.json();
+                    webix.message(result.message);
+
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Login error:", error);
+
+                    let data = {};
+
+                    try {
+                        data = JSON.parse(error.responseText);
+                    } catch (e) {}
+
+                    webix.message({
+                        type: "error",
+                        text: data.error || "Gagal menghubungi server"
+                    });
+                });
+        }
+
         webix.ready(function () {
             webix.ui({
+                css: "app-root",
                 rows: [
                     {},
                     {
@@ -22,75 +62,57 @@
                             {
                                 view: "form",
                                 id: "formLogin",
+                                css: "login-card",
                                 width: 400,
-                                padding: 25,
-                                
+                                minWidth: 300,
+                                padding: 28,
+                                margin: 12,
+                                borderless: true,
+
                                 elements: [
                                     {
-                                        template: "<h2 style='text-align:center'>Login</h2>",
-                                        height: 65,
-                                        borderless: true
+                                        view: "template",
+                                        css: "login-head",
+                                        borderless: true,
+                                        height: 96,
+                                        template: `
+                                            <div class="login-brand">Cozfre</div>
+                                            <div class="login-title">Login</div>
+                                        `
                                     },
                                     {
                                         view: "text",
                                         name: "username",
                                         label: "Username",
-                                        required: true
+                                        labelPosition: "top",
+                                        required: true,
+                                        on: { onEnter: doLogin }
                                     },
                                     {
                                         view: "text",
                                         name: "password",
                                         type: "password",
                                         label: "Password",
-                                        required: true
+                                        labelPosition: "top",
+                                        required: true,
+                                        on: { onEnter: doLogin }
                                     },
+                                    { height: 4 },
                                     {
                                         margin: 10,
                                         cols: [
                                             {
                                                 view: "button",
                                                 value: "Login",
-                                                css: "webix_primary",
-                                                click: function () {
-                                                    const form = $$("formLogin");
-                                                    if (!form.validate()) {
-                                                        webix.message("Username dan password wajib diisi");
-                                                        return;
-                                                    }
-                                                    
-                                                    const data = form.getValues();
-
-                                                    webix.ajax()
-                                                        .headers({"Content-Type": "application/json"})
-                                                        .post("/auth/login", JSON.stringify(data))
-                                                        .then(function (response) {
-                                                            const result = response.json();
-                                                            webix.message(result.message);
-
-                                                            if (result.redirect) {
-                                                                window.location.href = result.redirect;
-                                                            }
-                                                        })
-                                                        .catch(function(error) {
-                                                            console.error("Login error:", error);
-
-                                                            let data = {};
-
-                                                            try {
-                                                                data = JSON.parse(error.responseText);
-                                                            } catch (e) {
-                                                            }
-
-                                                            webix.message({
-                                                                type: "error",
-                                                                text: data.error || "Gagal menghubungi server"
-                                                            });
-                                                        });
-                                                }
+                                                css: "btn-checkout",
+                                                height: 46,
+                                                click: doLogin
                                             },
                                             {
                                                 view: "button",
                                                 value: "Cancel",
+                                                css: "btn-secondary",
+                                                height: 46,
                                                 click: function () {
                                                     $$("formLogin").clear();
                                                 }

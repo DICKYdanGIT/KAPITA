@@ -1,8 +1,0 @@
-python -m venv venv
-./venv/Scripts/activate
-
-
-Flask
-pymongo
-python-dotenv
--r requirements.txt

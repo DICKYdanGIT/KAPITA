@@ -3,101 +3,75 @@ let cartChange = 0;
 
 function cartContent() {
     return {
+        id: "cartPanel",
+        css: "cart-panel",
         width: 400,
         rows: [
             {
                 view: "toolbar",
-                height: 55,
+                css: "cart-title",
+                height: 56,
                 cols: [
-                    {
-                        view: "label",
-                        label: "Keranjang Belanja"
-                    }
+                    { view: "label", label: "Keranjang Belanja" }
                 ]
             },
 
             {
                 view: "datatable",
                 id: "tableCart",
+                css: "cart-table",
+                header: false,
                 scrollX: false,
                 scrollY: true,
                 borderless: true,
+                rowHeight: 72,
 
                 columns: [
                     {
                         id: "name",
-                        header: "Produk",
-                        fillspace: 2,
+                        fillspace: true,
                         template: function(obj) {
-                            if (obj.is_free) {
-                                return obj.name + " (Gratis)";
-                            }
-                            return obj.name;
-                        }
-                    },
-                    {
-                        width: 30,
-                        template: function(obj) {
-                            if (obj.is_free) {
-                                return "<span></span>";
-                            }
-                            return "<span class='min'>--</span>";
-                        }
-                    },
-                    {
-                        id: "qty",
-                        header: "Qty",
-                        width: 45
-                    },
-                    {
-                        width: 30,
-                        template: function(obj) {
-                            if (obj.is_free) {
-                                return "<span></span>";
-                            }
-                            return "<span class='max'>++</span>";
-                        }
-                    },
-                    {
-                        id: "price",
-                        header: "Harga",
-                        width: 90,
-                        template: function(obj) {
-                            return Number(obj.price).toLocaleString("id-ID");
-                        }
-                    },
-                    {
-                        id: "subtotal",
-                        header: "Subtotal",
-                        width: 105,
-                        template: function(obj) {
-                            return Number(obj.subtotal).toLocaleString("id-ID");
-                        }
-                    },
-                    {
-                        width: 30,
-                        template: function(obj) {
-                            if (obj.is_free) {
-                                return "<span></span>";
-                            }
-                            return "<span class='del'>-|-</span>";
-                        }
-                    },
-                ],
+                            const tag = obj.is_free ? "<span class='tag-free'>Gratis</span>" : "";
 
+                            const qtyControl = obj.is_free
+                                ? `<span class="qty-num">${obj.qty}</span>`
+                                : `<div class="qty-ctrl">
+                                    <span class="qty-btn min">&minus;</span>
+                                    <span class="qty-num">${obj.qty}</span>
+                                    <span class="qty-btn max">+</span>
+                                </div>`;
+
+                            return `
+                                <div class="cart-row">
+                                    <div class="cart-line">
+                                        <div class="cart-name">${webix.template.escape(obj.name)}${tag}</div>
+                                        <div class="cart-calc">${obj.qty} x ${Number(obj.price).toLocaleString("id-ID")}</div>
+                                    </div>
+                                    <div class="cart-line cart-line-bottom">
+                                        ${qtyControl}
+                                        <div class="cart-sub">${Number(obj.subtotal).toLocaleString("id-ID")}</div>
+                                    </div>
+                                </div>`;
+                        }
+                    },
+                    {
+                        width: 40,
+                        css: "cell-center",
+                        template: function(obj) {
+                            if (obj.is_free) return "";
+                            return "<span class='cart-del mdi mdi-trash-can-outline del'></span>";
+                        }
+                    }
+                ],
                 onClick: {
                     "min": function(e, id) {
-                        const item = this.getItem(id);
-                        minQty(item.product_id);
+                        minQty(this.getItem(id).product_id);
                     },
-
                     "max": function(e, id) {
-                        const item = this.getItem(id);
-                        maxQty(item.product_id);
+                        maxQty(this.getItem(id).product_id);
                     },
                     "del": function(e, id) {
-                        const item = this.getItem(id);
-                        deleteCartProduct(item.product_id);
+                        deleteCartProduct(this.getItem(id).product_id);
                     }
                 },
 
@@ -105,19 +79,17 @@ function cartContent() {
             },
 
             {
-                padding: 15,
+                css: "cart-summary",
+                padding: 16,
+                margin: 6,
                 rows: [
                     {
                         view: "select",
                         id: "promoSelect",
                         label: "Promo",
                         labelWidth: 65,
-
-                        options: [
-                            { id: "", value: "Tanpa Promo" }
-                        ],
+                        options: [{ id: "", value: "Tanpa Promo" }],
                         value: "",
-
                         on: {
                             onChange: function() {
                                 cartUpdate();
@@ -125,90 +97,59 @@ function cartContent() {
                         }
                     },
 
-                    { height: 15 },
-
                     {
+                        height: 26,
                         cols: [
-                            {
-                                view: "label",
-                                label: "Subtotal"
-                            },
-                            {
-                                view: "label",
-                                id: "cartSubtotal",
-                                label: "Rp 0",
-                                align: "right"
-                            }
+                            { view: "label", label: "Subtotal", css: "sum-label" },
+                            { view: "label", id: "cartSubtotal", label: "Rp 0", align: "right", css: "sum-value" }
+                        ]
+                    },
+                    {
+                        height: 26,
+                        cols: [
+                            { view: "label", label: "Diskon", css: "sum-label" },
+                            { view: "label", id: "cartDiscount", label: "Rp 0", align: "right", css: "sum-value" }
                         ]
                     },
 
+                    { view: "template", template: "", height: 1, css: "cart-divider" },
+
                     {
+                        height: 36,
                         cols: [
-                            {
-                                view: "label",
-                                label: "Diskon"
-                            },
-                            {
-                                view: "label",
-                                id: "cartDiscount",
-                                label: "Rp 0",
-                                align: "right"
-                            }
+                            { view: "label", label: "TOTAL", css: "sum-total sum-label" },
+                            { view: "label", id: "cartTotal", label: "Rp 0", align: "right", css: "sum-total sum-value" }
                         ]
                     },
-
-                    {
-                        view: "template",
-                        template: "<hr></hr>",
-                        height: 2
-                    },
-
-                    {
-                        cols: [
-                            {
-                                view: "label",
-                                label: "TOTAL"
-                            },
-                            {
-                                view: "label",
-                                id: "cartTotal",
-                                label: "Rp 0",
-                                align: "right"
-                            }
-                        ]
-                    },
-
-                    { height: 15 },
 
                     {
                         view: "text",
                         id: "checkoutCash",
                         label: "Uang Diterima",
-                        labelWidth: 120,
+                        labelPosition: "top",
                         placeholder: "Masukkan nominal",
-                        attributes: {
-                            type: "number",
-                            min: 0
-                        },
+                        attributes: { type: "number", min: 0 },
                         on: {
+                            onTimedKeyPress: function() {
+                                cartUpdate();
+                            },
                             onChange: function() {
                                 cartUpdate();
                             }
                         }
                     },
 
-                    { height: 15 },
-
                     {
                         view: "button",
+                        css: "btn-checkout",
                         value: "Checkout",
-                        height: 45,
+                        height: 46,
 
                         click: function() {
                             const cash = Number($$("checkoutCash").getValue());
                             const total = cartTotal;
 
-                            if(total == 0){
+                            if (total == 0) {
                                 webix.message("Keranjang tidak boleh kosong");
                                 return;
                             }
@@ -222,19 +163,11 @@ function cartContent() {
                                 webix.message("Uang pembayaran kurang");
                                 return;
                             }
-                            
-                            $$("windowTotal").setValue(
-                                "Rp " + cartTotal.toLocaleString("id-ID")
-                            );
 
-                            $$("windowCash").setValue(
-                                "Rp " + cash.toLocaleString("id-ID")
-                            );
-                            
-                            $$("windowCashback").setValue(
-                                "Rp " + cartChange.toLocaleString("id-ID")
-                            );
-                            
+                            $$("windowTotal").setValue("Rp " + cartTotal.toLocaleString("id-ID"));
+                            $$("windowCash").setValue("Rp " + cash.toLocaleString("id-ID"));
+                            $$("windowCashback").setValue("Rp " + cartChange.toLocaleString("id-ID"));
+
                             $$("cartWindow").show();
                         }
                     }
@@ -364,56 +297,54 @@ function cartWindow() {
     return {
         view: "window",
         id: "cartWindow",
+        css: "checkout-window",
         position: "center",
         modal: true,
         move: true,
         width: 400,
-        height: 300,
+        height: 330,
+        paddingX: 12,
         head: "Checkout",
 
         body: {
             padding: 20,
+            margin: 8,
             rows: [
                 {
-                    view: "label",
-                    label: "Total Belanja",
-                    height: 25
+                    height: 32,
+                    cols: [
+                        { view: "label", label: "Total Belanja", css: "sum-label" },
+                        { view: "label", id: "windowTotal", label: "Rp 0", align: "right", css: "sum-total sum-value" }
+                    ]
                 },
                 {
-                    view: "label",
-                    label: "Rp 0",
-                    id: "windowTotal",
-                    height: 35,
+                    height: 32,
+                    cols: [
+                        { view: "label", label: "Uang Diterima", css: "sum-label" },
+                        { view: "label", id: "windowCash", label: "Rp 0", align: "right", css: "sum-value" }
+                    ]
                 },
+
+                { view: "template", template: "", height: 1, css: "cart-divider" },
+
                 {
-                    view: "label",
-                    label: "Uang Diterima",
-                    height: 25
+                    height: 44,
+                    css: "checkout-change",
+                    cols: [
+                        { width: 16 },
+                        { view: "label", label: "Kembalian", css: "sum-label" },
+                        { view: "label", id: "windowCashback", label: "Rp 0", align: "right", css: "sum-total sum-value" },
+                        { width: 16 },
+                    ]
                 },
-                {
-                    view: "label",
-                    label: "Rp 0",
-                    id: "windowCash",
-                    height: 35
-                },
-                {
-                    view: "template",
-                    template: "<hr></hr>",
-                },
-                {
-                    view: "label",
-                    label: "Kembalian",
-                    height: 25
-                },
-                {
-                    view: "label",
-                    label: "Rp 0",
-                    id: "windowCashback",
-                },
+
+                {},
+
                 {
                     view: "button",
+                    css: "btn-checkout",
                     value: "Selesai",
-                    height: 40,
+                    height: 46,
                     click: function() {
                         checkout();
                     }

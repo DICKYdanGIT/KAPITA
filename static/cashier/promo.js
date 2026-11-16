@@ -1,141 +1,71 @@
 function promoContentWindow() {
+    const esc = webix.template.escape;
+
+    const lines = (list, cls) =>
+        Array.isArray(list) && list.length
+            ? list.map(item => `<div class="promo-line ${cls}">${esc(item)}</div>`).join("")
+            : `<div class="promo-empty">-</div>`;
+
     return {
         view: "window",
         id: "promoContentWindow",
-        width: 1218,
-        height: 720,
+        css: "promo-window",
+        width: Math.min(1100, window.innerWidth - 32),
+        height: Math.min(720, window.innerHeight - 32),
         position: "center",
         modal: true,
         move: true,
         close: true,
         head: "Promo Tersedia",
+
         on: {
             onHide: function() {
                 $$("cashierSidebar").select("cashier");
             }
         },
+
         body: {
+            padding: 12,
             rows: [
                 {
                     view: "dataview",
                     id: "promoList",
+                    css: "promo-grid",
                     url: "/promo/display",
                     scroll: "y",
                     select: false,
                     borderless: true,
-
+                    xCount: 3,
 
                     type: {
-                        width: 400,
-                        height: 350,
+                        width: "auto",
+                        height: 400,
+                        css: "promo-item",
 
                         template: function(obj) {
-                            const buy = Array.isArray(obj.buy)
-                                ? obj.buy : [];
-
-                            const get = Array.isArray(obj.get)
-                                ? obj.get : [];
-
                             return `
-                                <div style="
-                                    box-sizing: border-box;
-                                    height: 100%;
-                                    padding: 18px;
-                                    border: 1px solid #d9dfe5;
-                                    border-radius: 8px;
-                                    background: #ffffff;
-                                    overflow: hidden;
-                                ">
-                                    <div style="
-                                        font-size: 19px;
-                                        font-weight: bold;
-                                        color: #263746;
-                                        margin-bottom: 5px;
-                                    ">
-                                        ${webix.template.escape(obj.name || "")}
+                                <div class="promo-card">
+                                    <div class="promo-name">${esc(obj.name || "")}</div>
+                                    <div class="promo-code">${esc(obj.code || "")}</div>
+
+                                    <div class="promo-section">
+                                        <div class="promo-label">Beli</div>
+                                        <div class="promo-items">${lines(obj.buy, "")}</div>
                                     </div>
 
-                                    <div style="
-                                        font-size: 15px;
-                                        color: #64748b;
-                                        margin-bottom: 12px;
-                                    ">
-                                        ${webix.template.escape(obj.code || "")}
+                                    <div class="promo-section">
+                                        <div class="promo-label">Dapat</div>
+                                        <div class="promo-items">${lines(obj.get, "get")}</div>
                                     </div>
 
-                                    <hr style="
-                                        border: none;
-                                        border-top: 1px solid #d9dfe5;
-                                    ">
-
-                                    <div style="
-                                        font-size: 15px;
-                                        font-weight: bold;
-                                        color: #334155;
-                                        margin-top: 12px;
-                                        margin-bottom: 6px;
-                                    ">
-                                        Beli
-                                    </div>
-
-                                    ${
-                                        buy.length
-                                        ? buy.map(item => `
-                                            <div style="
-                                                font-size: 15px;
-                                                color: #475569;
-                                                margin-bottom: 5px;
-                                            ">
-                                                ${webix.template.escape(item)}
-                                            </div>
-                                        `).join("")
-                                        : `<div style="color:#94a3b8;">-</div>`
-                                    }
-
-                                    <div style="
-                                        font-size: 15px;
-                                        font-weight: bold;
-                                        color: #334155;
-                                        margin-top: 12px;
-                                        margin-bottom: 6px;
-                                    ">
-                                        Dapat
-                                    </div>
-
-                                    ${
-                                        get.length
-                                        ? get.map(item => `
-                                            <div style="
-                                                font-size: 15px;
-                                                color: #2563eb;
-                                                margin-bottom: 5px;
-                                            ">
-                                                ${webix.template.escape(item)}
-                                            </div>
-                                        `).join("")
-                                        : `<div style="color:#94a3b8;">-</div>`
-                                    }
-
-                                    <hr style="
-                                        border: none;
-                                        border-top: 1px solid #d9dfe5;
-                                        margin-top: 12px;
-                                    ">
-
-                                    <div style="
-                                        font-size: 14px;
-                                        color: #64748b;
-                                        margin-top: 10px;
-                                    ">
-                                        ${webix.template.escape(obj.start || "-")}
-                                        -
-                                        ${webix.template.escape(obj.end || "-")}
+                                    <div class="promo-date">
+                                        ${esc(obj.start || "-")} sampai ${esc(obj.end || "-")}
                                     </div>
                                 </div>
                             `;
                         }
-                    },
-                },
+                    }
+                }
             ]
         }
     };

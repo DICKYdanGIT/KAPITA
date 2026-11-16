@@ -4,138 +4,87 @@ function promoContent() {
         rows: [
             {
                 view: "toolbar",
+                css: "cart-title",
                 height: 56,
-                css: "webix_header",
                 cols: [
-                    {
-                        view: "label",
-                        label: "Data Promo"
-                    }
+                    { view: "label", label: "Data Promo" }
                 ]
             },
 
             {
-                padding: 22,
+                css: "cashier-main",
+                padding: 20,
+                margin: 14,
                 rows: [
                     {
+                        height: 110,
+                        margin: 14,
                         cols: [
                             {
-                                id: "totalPromosAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Jumlah Promo
-                                        </div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            Total promo terdaftar
-                                        </div>
-                                    </div>
-                                `
+                                id: "totalPromosAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Jumlah Promo</div><div class="stat-value">--</div><div class="stat-note">Total promo terdaftar</div></div>`
                             },
                             {
-                                id: "totalQuotaPromoAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Total Kuota Promo
-                                        </div>
-                                        <div style="font-size:21px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "totalQuotaPromoAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Kuota Promo</div><div class="stat-value small">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "totalPromoExpiredAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Promo Expired
-                                        </div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "totalPromoExpiredAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Promo Expired</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "totalPromoActiveAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Total Promo Aktif
-                                        </div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "totalPromoActiveAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Promo Aktif</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             }
                         ]
                     },
 
-                    { height: 20 },
-
                     {
                         view: "datatable",
                         id: "tablePromo",
-                        scroll: false,
+                        css: "admin-table",
+                        scroll: "y",
+                        borderless: true,
+                        rowHeight: 48,
+                        headerRowHeight: 38,
+                        hover: "row-hover",
                         url: "/promo/",
-                        select: "row",
 
                         columns: [
                             {
                                 id: "name",
                                 header: "Nama Promo",
-                                fillspace: 2
+                                fillspace: 2,
+                                template: function(obj) {
+                                    return "<b>" + webix.template.escape(obj.name) + "</b>";
+                                }
                             },
                             {
                                 id: "code",
                                 header: "Kode Promo",
-                                fillspace: 1
+                                fillspace: 1,
+                                template: function(obj) {
+                                    return "<span class='tag-promo'>" + webix.template.escape(obj.code) + "</span>";
+                                }
                             },
-                            {
-                                id: "promo_category_id",
-                                header: "Kategori",
-                                fillspace: 1
-                            },
+                            { id: "promo_category_id", header: "Kategori", fillspace: 1 },
                             {
                                 id: "quantity",
-                                header: "Quantity",
-                                fillspace: 1
+                                header: { text: "Quantity", css: "cell-right" },
+                                css: "cell-right",
+                                fillspace: 1,
+                                template: function(obj) {
+                                    return "<span class='money-strong'>" + Number(obj.quantity).toLocaleString("id-ID") + "</span>";
+                                }
                             },
                             {
                                 id: "status",
                                 header: "Status",
                                 fillspace: 1,
-                                template: function (obj) {
+                                template: function(obj) {
                                     return obj.status
-                                        ? "<button class='promo_status'>Aktif</button>"
-                                        : "<button class='promo_status'>Tidak Aktif</button>";
+                                        ? "<button class='status-btn on promo_status'>Aktif</button>"
+                                        : "<button class='status-btn off promo_status'>Tidak Aktif</button>";
                                 }
                             }
                         ],
@@ -149,13 +98,14 @@ function promoContent() {
                                 ).then(function () {
                                     $$("tablePromo").clearAll();
                                     $$("tablePromo").load("/promo/");
-                                    loadTotalPromoActiveAdmin() 
+                                    loadTotalPromoActiveAdmin();
                                     webix.message("Status promo berhasil diubah");
                                 });
 
                                 return false;
                             }
                         },
+
                         on: {
                             onItemClick: function (id) {
                                 const promo = this.getItem(id);
@@ -164,23 +114,25 @@ function promoContent() {
                                     "/promo/display/" + promo._id
                                 ).then(function (response) {
                                     const detail = response.json();
-                                    
+
+                                    $$("promoDetailHead").setValues(promo);
+
                                     $$("promoDetailRequirement").setHTML(
-                                        detail.buy.map(item =>
-                                            webix.template.escape(item)
-                                        ).join("<br>")
+                                        detail.buy.length
+                                            ? detail.buy.map(item => "<div class='promo-line'>" + webix.template.escape(item) + "</div>").join("")
+                                            : "<span class='promo-empty'>-</span>"
                                     );
 
                                     $$("promoDetailBenefit").setHTML(
-                                        detail.get.map(item =>
-                                            webix.template.escape(item)
-                                        ).join("<br>")
+                                        detail.get.length
+                                            ? detail.get.map(item => "<div class='promo-line get'>" + webix.template.escape(item) + "</div>").join("")
+                                            : "<span class='promo-empty'>-</span>"
                                     );
 
-                                    $$("promoDetailPeriod").setValue(
-                                        "Periode: " + detail.start +
-                                        " sampai " + detail.end
-                                    );
+                                    $$("promoDetailPeriod").setValues({
+                                        start: detail.start,
+                                        end: detail.end
+                                    });
 
                                     $$("promoDetailWindow").show();
 
@@ -190,8 +142,10 @@ function promoContent() {
                                 });
                             }
                         },
-                        pager:"PagerPromoAdmin",
+
+                        pager: "PagerPromoAdmin"
                     },
+
                     PagerPromoAdmin()
                 ]
             }
@@ -201,12 +155,20 @@ function promoContent() {
 
 function PagerPromoAdmin() {
     return {
-        view: "pager",
-        id: "PagerPromoAdmin",
-        size: 12,
-        group: 5,
-        template: "{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}",
-        autosize: false
+        height: 40,
+        cols: [
+            {},
+            {
+                view: "pager",
+                id: "PagerPromoAdmin",
+                css: "cashier-pager",
+                size: 12,
+                group: 5,
+                template: "{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}",
+                autosize: true
+            },
+            {}
+        ]
     };
 }
 
@@ -215,46 +177,94 @@ function promoDetailWindow() {
     return {
         view: "window",
         id: "promoDetailWindow",
-        width: 400,
-        height: 600,
+        css: "promo-window",
+        width: 460,
+        height: 580,
         modal: true,
         close: true,
+        move: true,
         position: "center",
         head: "Detail Promo",
 
         body: {
-            padding: 15,
+            css: "cashier-main",
+            padding: 16,
+            margin: 10,
             rows: [
                 {
-                    view: "label",
-                    label: "Syarat",
-                    css: "webix_strong"
+                    id: "promoDetailHead",
+                    view: "template",
+                    css: "detail-head",
+                    borderless: true,
+                    height: 84,
+                    data: {},
+                    template: function(obj) {
+                        return `
+                            <div class="detail-head-card">
+                                <div class="detail-head-main">
+                                    <div class="detail-head-name">${webix.template.escape(obj.name || "-")}</div>
+                                    <span class="tag-promo">${webix.template.escape(obj.code || "-")}</span>
+                                </div>
+                                <div class="detail-head-qty">
+                                    <div class="detail-info-label">Kuota</div>
+                                    <div class="detail-info-value">${Number(obj.quantity || 0).toLocaleString("id-ID")}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                },
+
+                {
+                    view: "template",
+                    css: "detail-label",
+                    borderless: true,
+                    height: 28,
+                    template: "Syarat"
                 },
                 {
                     view: "template",
                     id: "promoDetailRequirement",
-                    height: 100,
+                    css: "detail-list",
                     borderless: true,
                     template: ""
                 },
 
                 {
-                    view: "label",
-                    label: "Dapat",
-                    css: "webix_strong"
+                    view: "template",
+                    css: "detail-label free",
+                    borderless: true,
+                    height: 28,
+                    template: "Dapat"
                 },
                 {
                     view: "template",
                     id: "promoDetailBenefit",
-                    height: 100,
+                    css: "detail-list get",
                     borderless: true,
                     template: ""
                 },
 
                 {
-                    view: "label",
                     id: "promoDetailPeriod",
-                    label: "Periode: -"
+                    view: "template",
+                    css: "detail-info",
+                    borderless: true,
+                    height: 64,
+                    data: {},
+                    template: function(obj) {
+                        return `
+                            <div class="detail-info-grid">
+                                <div class="detail-info-item">
+                                    <div class="detail-info-label">Mulai</div>
+                                    <div class="detail-info-value">${webix.template.escape(obj.start || "-")}</div>
+                                </div>
+                                <div class="detail-info-item">
+                                    <div class="detail-info-label">Berakhir</div>
+                                    <div class="detail-info-value">${webix.template.escape(obj.end || "-")}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
                 }
             ]
         }

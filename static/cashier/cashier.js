@@ -1,32 +1,24 @@
-function cashierContent(){
-    return{
-        padding: 22,
+function cashierContent() {
+    return {
+        css: "cashier-main",
+        padding: 20,
+        margin: 12,
         rows: [
-            { height: 20 },
-
             {
-                padding: 10,
+                height: 42,
                 cols: [
                     {
                         id: "search",
                         view: "search",
                         placeholder: "Cari nama produk...",
-                        width: 400,
+                        gravity: 3,
+                        minWidth: 160,
+                        maxWidth: 420,
                         on: {
                             onTimedKeyPress: function() {
                                 searchProductCashier();
                             }
                         }
-                    },
-                    {}
-                ]
-            },
-            {
-                cols: [
-                    {
-                        view: "label",
-                        id: "productCount",
-                        label: "0 Produk",
                     },
                     {},
                     {
@@ -48,24 +40,42 @@ function cashierContent(){
                 ]
             },
 
-            { height: 10 },
+            {
+                view: "label",
+                id: "productCount",
+                css: "product-count",
+                label: "0 Produk",
+                height: 22
+            },
 
             {
                 view: "dataview",
                 id: "tableProductCashier",
+                css: "product-grid",
                 scroll: false,
                 url: "/product",
+                xCount: 4,
+
                 type: {
-                    width: 150,
-                    height: 200,
-                    template: `
-                        <div class="product-card">
-                            <div class="product-name">#name#</div>
-                            <div class="product-price">Rp #price#</div>
-                            <div class="product-stock">Stok: #stock#</div>
-                        </div>
-                    `
+                    width: "auto",
+                    height: 150,
+                    css: "product-item",
+
+                    template: function(obj) {
+                        const stock = Number(obj.stock);
+                        const stockClass = stock <= 0 ? "empty" : stock <= 5 ? "low" : "";
+                        const stockText = stock <= 0 ? "Stok habis" : "Stok: " + stock;
+
+                        return `
+                            <div class="product-card">
+                                <div class="product-name">${webix.template.escape(obj.name || "")}</div>
+                                <div class="product-price">Rp ${Number(obj.price).toLocaleString("id-ID")}</div>
+                                <div class="product-stock ${stockClass}">${stockText}</div>
+                            </div>
+                        `;
+                    }
                 },
+
                 on: {
                     onAfterLoad: function() {
                         $$("productCount").setValue(this.count() + " Produk");
@@ -74,30 +84,39 @@ function cashierContent(){
                     onAfterRender: function() {
                         $$("productCount").setValue(this.count() + " Produk");
                     },
+
                     onItemClick: function(id) {
                         const product = this.getItem(id);
                         addToCart(product);
                     }
                 },
+
                 pager: "PagerProductCashier"
             },
+
             PagerProductCashier()
         ]
-    }   
-}
-
-
-function PagerProductCashier() {
-    return {
-        view: "pager",
-        id: "PagerProductCashier",
-        size: 12,
-        group: 5,
-        template: "{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}",
-        autosize: false
     };
 }
 
+function PagerProductCashier() {
+    return {
+        height: 40,
+        cols: [
+            {},
+            {
+                view: "pager",
+                id: "PagerProductCashier",
+                css: "cashier-pager",
+                size: 16,
+                group: 5,
+                template: "{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}",
+                autosize: true
+            },
+            {}
+        ]
+    };
+}
 
 
 function addToCart(product) {

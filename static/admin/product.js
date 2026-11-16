@@ -4,135 +4,96 @@ function productContent() {
         rows: [
             {
                 view: "toolbar",
+                css: "cart-title",
                 height: 56,
-                css: "webix_header",
                 cols: [
-                    {
-                        view: "label",
-                        label: "Data Produk"
-                    }
+                    { view: "label", label: "Data Produk" }
                 ]
             },
 
             {
-                padding: 22,
+                css: "cashier-main",
+                padding: 20,
+                margin: 14,
                 rows: [
                     {
+                        height: 110,
+                        margin: 14,
                         cols: [
                             {
-                                id: "totalProductsAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Jumlah Produk
-                                        </div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "totalProductsAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Jumlah Produk</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "bestProductAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Produk Terlaris
-                                        </div>
-                                        <div style="font-size:21px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "bestProductAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Produk Terlaris</div><div class="stat-value small">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "totalStockProductAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Total Stok
-                                        </div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "totalStockProductAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Total Stok</div><div class="stat-value">--</div><div class="stat-note">-</div></div>`
                             },
                             {
-                                id: "AverageMarginProductAdmin",
-                                view: "template",
-                                height: 110,
-                                borderless: true,
-                                template: `
-                                    <div style="padding:16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; height:100%; box-sizing:border-box;">
-                                        <div style="color:#64748b; font-size:13px;">
-                                            Rata-rata Margin
-                                        </div>
-                                        <div style="font-size:27px; font-weight:700; margin-top:12px; color:#1e293b;">
-                                            --%
-                                        </div>
-                                        <div style="font-size:11px; color:#94a3b8; margin-top:5px;">
-                                            -
-                                        </div>
-                                    </div>
-                                `
+                                id: "AverageMarginProductAdmin", view: "template", borderless: true, css: "stat-wrap",
+                                template: `<div class="stat-card"><div class="stat-label">Rata-rata Margin</div><div class="stat-value">--%</div><div class="stat-note">-</div></div>`
                             }
                         ]
                     },
 
-                    { height: 20 },
-
                     {
                         view: "datatable",
                         id: "tableProduct",
-                        scroll: false,
+                        css: "admin-table",
+                        scroll: "y",
+                        borderless: true,
+                        rowHeight: 48,
+                        headerRowHeight: 38,
+                        hover: "row-hover",
                         url: "/product/allMargin",
 
                         columns: [
                             { id: "name", header: "Nama Produk", fillspace: 2 },
-                            { id: "cost_price", header: "HPP", fillspace: 1,
+                            {
+                                id: "cost_price",
+                                header: { text: "HPP", css: "cell-right" },
+                                css: "cell-right",
+                                fillspace: 1,
                                 template: function(obj) {
                                     return Number(obj.cost_price).toLocaleString("id-ID");
                                 }
                             },
-                            { id: "price", header: "Harga Produk", fillspace: 1,
+                            {
+                                id: "price",
+                                header: { text: "Harga Produk", css: "cell-right" },
+                                css: "cell-right",
+                                fillspace: 1,
                                 template: function(obj) {
                                     return Number(obj.price).toLocaleString("id-ID");
                                 }
                             },
-                            { id: "margin", header: "Margin", fillspace: 1,
+                            {
+                                id: "margin",
+                                header: { text: "Margin", css: "cell-right" },
+                                css: "cell-right",
+                                fillspace: 1,
                                 template: obj => obj.margin + "%"
                             },
                             { id: "category_name", header: "Kategori", fillspace: 1 },
-                            { id: "stock", header: "Stock", fillspace: 1 },
+                            {
+                                id: "stock",
+                                header: { text: "Stock", css: "cell-right" },
+                                css: "cell-right",
+                                fillspace: 1
+                            },
                             {
                                 id: "status",
                                 header: "Status",
                                 fillspace: 1,
-                                template: function (obj) {
+                                template: function(obj) {
                                     return obj.status
-                                        ? "<button class='product_status'>Aktif</button>"
-                                        : "<button class='product_status'>Tidak Aktif</button>";
+                                        ? "<button class='status-btn on product_status'>Aktif</button>"
+                                        : "<button class='status-btn off product_status'>Tidak Aktif</button>";
                                 }
-                            },
+                            }
                         ],
 
                         onClick: {
@@ -150,8 +111,10 @@ function productContent() {
                                 return false;
                             }
                         },
-                        pager:"PagerProductAdmin",
+
+                        pager: "PagerProductAdmin"
                     },
+
                     PagerProductAdmin()
                 ]
             }
@@ -161,12 +124,20 @@ function productContent() {
 
 function PagerProductAdmin() {
     return {
-        view: "pager",
-        id: "PagerProductAdmin",
-        size: 12,
-        group: 5,
-        template: "{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}",
-        autosize: false
+        height: 40,
+        cols: [
+            {},
+            {
+                view: "pager",
+                id: "PagerProductAdmin",
+                css: "cashier-pager",
+                size: 12,
+                group: 5,
+                template: "{common.first()} {common.prev()} {common.pages()} {common.next()} {common.last()}",
+                autosize: true
+            },
+            {}
+        ]
     };
 }
 
