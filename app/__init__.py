@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 load_dotenv()
 
+
 def create_app():
     app = Flask(
         __name__,
@@ -13,7 +14,7 @@ def create_app():
         template_folder="../templates",
     )
 
-     MONGO_URI = os.getenv("MONGO_URI")
+    MONGO_URI = os.getenv("MONGO_URI")
     MONGO_DB = os.getenv("MONGO_DB")
     SECRET_KEY = os.getenv("SECRET_KEY")
 
@@ -26,13 +27,17 @@ def create_app():
     if not SECRET_KEY:
         raise ValueError("SECRET KEY Tidak Ada!")
 
-    print("DATABASE:", MONGO_DB)
-    print("MENGGUNAKAN ATLAS:", MONGO_URI.startswith("mongodb+srv://"))
-
     app.config["SECRET_KEY"] = SECRET_KEY
 
     client = MongoClient(MONGO_URI)
     db = client[MONGO_DB]
+
+    try:
+        client.admin.command("ping")
+        print("Berhasil terhubung ke MongoDB!")
+    except Exception as e:
+        client.close()
+        raise RuntimeError("Gagal terhubung ke MongoDB") from e
 
     app.config["MONGO_CLIENT"] = client
     app.config["MONGO_DB"] = db
