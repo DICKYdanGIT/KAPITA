@@ -15,6 +15,8 @@ def create_app():
 
     MONGO_URI = os.getenv("MONGO_URI")
     MONGO_DB = os.getenv("MONGO_DB")
+    print("DATABASE:", MONGO_DB)
+    print("MENGGUNAKAN ATLAS:", MONGO_URI.startswith("mongodb+srv://"))
     SECRET_KEY = os.getenv("SECRET_KEY")
 
     if not MONGO_URI:
