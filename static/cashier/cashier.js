@@ -178,7 +178,7 @@ function searchProductCashier() {
 
     if (keyword.trim() == "") {
         table.clearAll();
-        table.load("/product");
+        table.load("/product/");
         return;
     }
 
