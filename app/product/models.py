@@ -8,12 +8,10 @@ def get_category():
     db = current_app.config["MONGO_DB"]
     return db["product_category"]
 
+
 def get_all_category():
     return list(get_category().find()) 
 
-
-
-#############################
 
 def get_product():
     db = current_app.config["MONGO_DB"]
@@ -59,18 +57,47 @@ def get_all_products_with_margin():
 
 def switch_product_status(product_id):
     collection = get_product()
+
     if not ObjectId.is_valid(product_id):
         return False
 
-    product = collection.find_one({"_id": ObjectId(product_id)})
+    product = collection.find_one({
+        "_id": ObjectId(product_id)
+    })
+
     if not product:
         return False
 
+    if product.get("status") is True:
+        result = collection.update_one(
+            {"_id": product["_id"]},
+            {"$set": {"status": False}}
+        )
+        return result.modified_count > 0
+
+    if product.get("stock", 0) < 1:
+        return False
+
     result = collection.update_one(
-        {"_id": ObjectId(product_id)}, [{"$set": {"status": {"$not": "$status"}}}]
+        {"_id": product["_id"]},
+        [{"$set": {"status": {"$not": "$status"}}}]
     )
+
     return result.modified_count > 0
 
+
+def validate_product_status():
+    collection = get_product()
+    products = collection.find({
+        "status": True
+    })
+
+    for product in products:
+        if product.get("stock", 0) < 1:
+            collection.update_one(
+                {"_id": product["_id"]},
+                {"$set": {"status": False}}
+            )
 
 def min_product(product_id, qty):
     collection = get_product()

@@ -45,7 +45,7 @@ function cartContent() {
                                 <div class="cart-row">
                                     <div class="cart-line">
                                         <div class="cart-name">${webix.template.escape(obj.name)}${tag}</div>
-                                        <div class="cart-calc">${obj.qty} x ${Number(obj.price).toLocaleString("id-ID")}</div>
+                                        <div class="cart-calc">${Number(obj.qty)} x ${Number(obj.price).toLocaleString("id-ID")}</div>
                                     </div>
                                     <div class="cart-line cart-line-bottom">
                                         ${qtyControl}
@@ -301,6 +301,7 @@ function cartWindow() {
         position: "center",
         modal: true,
         move: true,
+        close: true,
         width: 400,
         height: 330,
         paddingX: 12,

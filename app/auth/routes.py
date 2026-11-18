@@ -35,6 +35,8 @@ def proses_login():
 
     session.clear()
 
+    session.permanent = True
+
     session["user_id"] = str(user["_id"])
     session["username"] = user["username"]
     session["role"] = user["role"]

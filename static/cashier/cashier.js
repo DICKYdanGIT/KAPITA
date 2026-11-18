@@ -53,14 +53,13 @@ function cashierContent() {
                 id: "tableProductCashier",
                 css: "product-grid",
                 scroll: false,
-                url: "/product",
+                url: "/product/",
                 xCount: 4,
 
                 type: {
                     width: "auto",
                     height: 150,
                     css: "product-item",
-
                     template: function(obj) {
                         const stock = Number(obj.stock);
                         const stockClass = stock <= 0 ? "empty" : stock <= 5 ? "low" : "";
@@ -70,7 +69,7 @@ function cashierContent() {
                             <div class="product-card">
                                 <div class="product-name">${webix.template.escape(obj.name || "")}</div>
                                 <div class="product-price">Rp ${Number(obj.price).toLocaleString("id-ID")}</div>
-                                <div class="product-stock ${stockClass}">${stockText}</div>
+                                <div class="product-stock ${stockClass}">${webix.template.escape(stockText)}</div>
                             </div>
                         `;
                     }
@@ -122,20 +121,47 @@ function PagerProductCashier() {
 function addToCart(product) {
     const table = $$("tableCart");
 
+    const stock = Number(product.stock);
+    const price = Number(product.price);
+
+    if (!Number.isFinite(stock) || stock <= 0) {
+        webix.message({
+            type: "error",
+            text: "Produk habis"
+        });
+        return;
+    }
+
     const productInCart = table.find(function(item) {
         return String(item.product_id) === String(product._id);
     }, true);
 
+    const currentQty = productInCart
+        ? Number(productInCart.qty)
+        : 0;
+
+    const newQty = currentQty + 1;
+
+    if (newQty > stock) {
+        webix.message({
+            type: "error",
+            text: `Stok tidak mencukupi`
+        });
+        return;
+    }
+
     if (productInCart) {
-        productInCart.qty += 1;
+        productInCart.qty = newQty;
+        productInCart.subtotal = newQty * price;
+
         table.updateItem(productInCart.id, productInCart);
     } else {
         table.add({
             product_id: String(product._id),
             name: product.name,
             qty: 1,
-            price: product.price,
-            subtotal: product.price
+            price: price,
+            subtotal: price
         });
     }
 

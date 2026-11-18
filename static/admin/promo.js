@@ -67,7 +67,14 @@ function promoContent() {
                                     return "<span class='tag-promo'>" + webix.template.escape(obj.code) + "</span>";
                                 }
                             },
-                            { id: "promo_category_id", header: "Kategori", fillspace: 1 },
+                            {
+                                id: "promo_category_id",
+                                header: "Kategori",
+                                fillspace: 1,
+                                template: function(obj) {
+                                    return webix.template.escape(obj.promo_category_id);
+                                }
+                            },
                             {
                                 id: "quantity",
                                 header: { text: "Quantity", css: "cell-right" },
@@ -99,7 +106,6 @@ function promoContent() {
                                     $$("tablePromo").clearAll();
                                     $$("tablePromo").load("/promo/");
                                     loadTotalPromoActiveAdmin();
-                                    webix.message("Status promo berhasil diubah");
                                 });
 
                                 return false;

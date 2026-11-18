@@ -1,11 +1,4 @@
 function handleAjaxError(error) {
-    console.error("AJAX Error:", error);
-    console.log("STATUS:", error.status);
-    console.log("RESPONSE:", error.responseText);
-    console.log("URL:", error.responseURL);
-    console.log("STATUS:", error.status);
-    console.log("RESPONSE:", error.responseText);
-
     let data = {};
 
     try {

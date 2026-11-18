@@ -19,15 +19,38 @@ def switch_promo_status(promo_id):
     if not ObjectId.is_valid(promo_id):
         return False
 
-    promo = collection.find_one({"_id": ObjectId(promo_id)})
+    promo = collection.find_one({
+        "_id": ObjectId(promo_id)
+    })
+
     if not promo:
         return False
 
-    result = collection.update_one(
-        {"_id": ObjectId(promo_id)}, [{"$set": {"status": {"$not": "$status"}}}]
+    if promo.get("status") is True:
+        collection.update_one(
+            {"_id": promo["_id"]},
+            {"$set": {"status": False}}
+        )
+        return False
+
+    now = datetime.utcnow()
+    period = promo.get("period", {})
+
+    if promo.get("quantity", 0) <= 0:
+        return False
+
+    if period.get("start") and now < period["start"]:
+        return False
+
+    if period.get("end") and now > period["end"]:
+        return False
+
+    collection.update_one(
+        {"_id": promo["_id"]},
+        {"$set": {"status": True}}
     )
 
-    return result.modified_count > 0
+    return True
 
 
 def use_promo_ticket(promo_id):
@@ -51,6 +74,21 @@ def validate_promo(promo, now):
         return False
 
     return True
+
+
+def validate_promo_status():
+    promo_collection = get_promo()
+    now = datetime.utcnow()
+    promos = promo_collection.find({
+        "status": True
+    })
+    for promo in promos:
+        if not validate_promo(promo, now):
+            promo_collection.update_one(
+                {"_id": promo["_id"]},
+                {"$set": {"status": False}}
+            )
+
 
 
 def check_promo(cart_items):
@@ -227,6 +265,7 @@ def get_expired_promos():
             }
         ]
     })
+
 
 def get_total_promo_true():
     promos = get_promo_true()

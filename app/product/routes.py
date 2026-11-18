@@ -8,7 +8,8 @@ from app.product.models import (
     get_all_products_with_margin, 
     get_total_product, 
     get_total_stock,
-    get_average_margin
+    get_average_margin,
+    validate_product_status,
 )
 from app.auth.decorator import login_required, role_required
 
@@ -16,6 +17,7 @@ from app.auth.decorator import login_required, role_required
 @login_required
 @role_required("cashier", "admin")
 def product_data():
+    validate_product_status()
     products = get_all_products()
     for product in products:
         product["_id"] = str(product["_id"])
@@ -26,6 +28,7 @@ def product_data():
 @login_required
 @role_required("admin")
 def product_margin():
+    validate_product_status()
     products = get_all_products_with_margin()
 
     for product in products:

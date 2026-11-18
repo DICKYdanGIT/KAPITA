@@ -52,7 +52,14 @@ function transactionContent() {
                         hover: "row-hover",
 
                         columns: [
-                            { id: "cashier_name", header: "Kasir", fillspace: 1 },
+                            {
+                                id: "cashier_name",
+                                header: "Kasir",
+                                fillspace: 1,
+                                template: function(obj) {
+                                    return webix.template.escape(obj.cashier_name || "");
+                                }
+                            },
                             {
                                 id: "created_at",
                                 header: "Tanggal Transaksi",
@@ -246,7 +253,7 @@ function transactionDetailWindow() {
                             <div class="detail-info-grid">
                                 <div class="detail-info-item wide">
                                     <div class="detail-info-label">Tanggal</div>
-                                    <div class="detail-info-value">${tanggal}</div>
+                                    <div class="detail-info-value">${webix.template.escape(tanggal)}</div>
                                 </div>
                                 <div class="detail-info-item">
                                     <div class="detail-info-label">Kasir</div>
@@ -275,7 +282,10 @@ function transactionDetailWindow() {
                         {
                             id: "name",
                             header: "Nama Produk",
-                            fillspace: 2
+                            fillspace: 2,
+                            template: function(obj) {
+                                return webix.template.escape(obj.name || "");
+                            }
                         },
                         {
                             id: "price",
@@ -322,7 +332,10 @@ function transactionDetailWindow() {
                                 {
                                     id: "name",
                                     header: "Nama Produk",
-                                    fillspace: 2
+                                    fillspace: 2,
+                                    template: function(obj) {
+                                        return webix.template.escape(obj.name || "");
+                                    }
                                 },
                                 {
                                     id: "qty",

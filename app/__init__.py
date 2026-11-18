@@ -3,6 +3,7 @@ import os
 from flask import Flask, redirect, url_for
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from datetime import timedelta
 
 load_dotenv()
 
@@ -13,6 +14,8 @@ def create_app():
         static_folder="../static",
         template_folder="../templates",
     )
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
+    app.config["SESSION_REFRESH_EACH_REQUEST"] = False
 
     MONGO_URI = os.getenv("MONGO_URI")
     MONGO_DB = os.getenv("MONGO_DB")

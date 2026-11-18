@@ -11,7 +11,8 @@ from app.promo.models import(
     get_total_promo,
     get_total_promo_quota,
     get_expired_promos,
-    get_total_promo_true
+    get_total_promo_true,
+    validate_promo_status
 )
 from app.product.models import get_product
 from app.auth.decorator import login_required, role_required
@@ -20,6 +21,8 @@ from app.auth.decorator import login_required, role_required
 @login_required
 @role_required("cashier", "admin")
 def get_promos():
+    validate_promo_status()
+
     promos = get_all_promo()
 
     product_ids = set()
@@ -104,6 +107,8 @@ def switch_status(promo_id):
 @login_required
 @role_required("cashier", "admin")
 def promo_for_display():
+    validate_promo_status()
+    
     promos = get_promo_true()
 
     product_ids = set()
@@ -185,7 +190,6 @@ def promo_for_display():
         })
 
     return jsonify(result)
-
 
 
 @promo_blueprint.get("/display/<promo_id>")

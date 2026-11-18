@@ -125,12 +125,14 @@ function dashboardContent() {
                                         type: {
                                             height: 52
                                         },
-                                        template: `
-                                            <div class="rank-row">
-                                                <span class="rank-name">#name#</span>
-                                                <span class="rank-meta">#total_sold# terjual</span>
-                                            </div>
-                                        `,
+                                        template: function(obj) {
+                                            return `
+                                                <div class="rank-row">
+                                                    <span class="rank-name">${webix.template.escape(obj.name || "")}</span>
+                                                    <span class="rank-meta">${webix.template.escape(String(obj.total_sold || 0))} terjual</span>
+                                                </div>
+                                            `;
+                                        },
                                         url: "/transaction/best-products"
                                     }
                                 ]
@@ -158,15 +160,17 @@ function dashboardContent() {
                                         type: {
                                             height: 52
                                         },
-                                        template: `
-                                            <div class="rank-row">
-                                                <div>
-                                                    <div class="rank-name">#name#</div>
-                                                    <div class="rank-sub">#code#</div>
+                                        template: function(obj) {
+                                            return `
+                                                <div class="rank-row">
+                                                    <div>
+                                                        <div class="rank-name">${webix.template.escape(obj.name || "")}</div>
+                                                        <div class="rank-sub">${webix.template.escape(obj.code || "")}</div>
+                                                    </div>
+                                                    <span class="rank-meta">${webix.template.escape(String(obj.total_used || 0))} kali digunakan</span>
                                                 </div>
-                                                <span class="rank-meta">#total_used# kali digunakan</span>
-                                            </div>
-                                        `,
+                                            `;
+                                        },
                                         url: "/transaction/best-promos"
                                     }
                                 ]

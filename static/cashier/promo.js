@@ -1,17 +1,10 @@
 function promoContentWindow() {
-    const esc = webix.template.escape;
-
-    const lines = (list, cls) =>
-        Array.isArray(list) && list.length
-            ? list.map(item => `<div class="promo-line ${cls}">${esc(item)}</div>`).join("")
-            : `<div class="promo-empty">-</div>`;
-
     return {
         view: "window",
         id: "promoContentWindow",
         css: "promo-window",
-        width: Math.min(1100, window.innerWidth - 32),
-        height: Math.min(720, window.innerHeight - 32),
+        width: 1100,
+        height: 720,
         position: "center",
         modal: true,
         move: true,
@@ -43,23 +36,35 @@ function promoContentWindow() {
                         css: "promo-item",
 
                         template: function(obj) {
+                            const buy = Array.isArray(obj.buy) && obj.buy.length
+                                ? obj.buy.map(item =>
+                                    `<div class="promo-line">${webix.template.escape(item)}</div>`
+                                ).join("")
+                                : `<div class="promo-empty">-</div>`;
+
+                            const get = Array.isArray(obj.get) && obj.get.length
+                                ? obj.get.map(item =>
+                                    `<div class="promo-line get">${webix.template.escape(item)}</div>`
+                                ).join("")
+                                : `<div class="promo-empty">-</div>`;
+
                             return `
                                 <div class="promo-card">
-                                    <div class="promo-name">${esc(obj.name || "")}</div>
-                                    <div class="promo-code">${esc(obj.code || "")}</div>
+                                    <div class="promo-name">${webix.template.escape(obj.name)}</div>
+                                    <div class="promo-code">${webix.template.escape(obj.code)}</div>
 
                                     <div class="promo-section">
                                         <div class="promo-label">Beli</div>
-                                        <div class="promo-items">${lines(obj.buy, "")}</div>
+                                        <div class="promo-items">${buy}</div>
                                     </div>
 
                                     <div class="promo-section">
                                         <div class="promo-label">Dapat</div>
-                                        <div class="promo-items">${lines(obj.get, "get")}</div>
+                                        <div class="promo-items">${get}</div>
                                     </div>
 
                                     <div class="promo-date">
-                                        ${esc(obj.start || "-")} sampai ${esc(obj.end || "-")}
+                                        ${webix.template.escape(obj.start || "-")} sampai ${webix.template.escape(obj.end || "-")}
                                     </div>
                                 </div>
                             `;

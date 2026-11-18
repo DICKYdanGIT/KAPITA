@@ -51,7 +51,14 @@ function productContent() {
                         url: "/product/allMargin",
 
                         columns: [
-                            { id: "name", header: "Nama Produk", fillspace: 2 },
+                            {
+                                id: "name",
+                                header: "Nama Produk",
+                                fillspace: 2,
+                                template: function(obj) {
+                                    return webix.template.escape(obj.name || "");
+                                }
+                            },
                             {
                                 id: "cost_price",
                                 header: { text: "HPP", css: "cell-right" },
@@ -77,7 +84,14 @@ function productContent() {
                                 fillspace: 1,
                                 template: obj => obj.margin + "%"
                             },
-                            { id: "category_name", header: "Kategori", fillspace: 1 },
+                            {
+                                id: "category_name",
+                                header: "Kategori",
+                                fillspace: 1,
+                                template: function(obj) {
+                                    return webix.template.escape(obj.category_name || "");
+                                }
+                            },
                             {
                                 id: "stock",
                                 header: { text: "Stock", css: "cell-right" },
@@ -105,7 +119,6 @@ function productContent() {
                                 ).then(function () {
                                     $$("tableProduct").clearAll();
                                     $$("tableProduct").load("/product/allMargin");
-                                    webix.message("Status product berhasil diubah");
                                 });
 
                                 return false;
@@ -170,7 +183,7 @@ function loadBestProductsAdmin() {
             const html = cardHtml(
                 product ? product.total_sold : 0, 
                 "Produk Terlaris",
-                product.name, 
+                webix.template.escape(product.name)
             )
 
             $$("bestProductAdmin").setHTML(html);
