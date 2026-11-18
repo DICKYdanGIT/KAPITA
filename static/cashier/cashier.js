@@ -133,7 +133,10 @@ function addToCart(product) {
     }
 
     const productInCart = table.find(function(item) {
-        return String(item.product_id) === String(product._id);
+        return (
+            String(item.product_id) === String(product._id) &&
+            item.is_free !== true
+        );
     }, true);
 
     const currentQty = productInCart
@@ -145,7 +148,7 @@ function addToCart(product) {
     if (newQty > stock) {
         webix.message({
             type: "error",
-            text: `Stok tidak mencukupi`
+            text: "Stok tidak mencukupi"
         });
         return;
     }
@@ -161,13 +164,13 @@ function addToCart(product) {
             name: product.name,
             qty: 1,
             price: price,
-            subtotal: price
+            subtotal: price,
+            is_free: false
         });
     }
 
     cartUpdate();
 }
-
 
 function searchProductCashier() {
     table = $$("tableProductCashier")

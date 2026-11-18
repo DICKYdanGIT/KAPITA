@@ -177,12 +177,14 @@ function cartContent() {
     };
 }
 
-
 function maxQty(productId) {
     const table = $$("tableCart");
 
     const product = table.find(function(item) {
-        return String(item.product_id) === String(productId);
+        return (
+            String(item.product_id) === String(productId) &&
+            item.is_free !== true
+        );
     }, true);
 
     if (!product) return;
@@ -199,7 +201,10 @@ function minQty(productId) {
     const table = $$("tableCart");
 
     const product = table.find(function(item) {
-        return String(item.product_id) === String(productId);
+        return (
+            String(item.product_id) === String(productId) &&
+            item.is_free !== true
+        );
     }, true);
 
     if (!product) return;
@@ -220,7 +225,10 @@ function deleteCartProduct(productId) {
     const table = $$("tableCart");
 
     const product = table.find(function(item) {
-        return String(item.product_id) === String(productId);
+        return (
+            String(item.product_id) === String(productId) &&
+            item.is_free !== true
+        );
     }, true);
 
     if (!product) return;
@@ -229,7 +237,6 @@ function deleteCartProduct(productId) {
 
     cartUpdate();
 }
-
 
 function cartUpdate() {
     const table = $$("tableCart");
