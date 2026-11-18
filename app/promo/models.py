@@ -90,7 +90,6 @@ def validate_promo_status():
             )
 
 
-
 def check_promo(cart_items):
     promos = get_all_promo()
     promo_list = []

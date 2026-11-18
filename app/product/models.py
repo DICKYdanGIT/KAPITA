@@ -99,6 +99,7 @@ def validate_product_status():
                 {"$set": {"status": False}}
             )
 
+
 def min_product(product_id, qty):
     collection = get_product()
 
@@ -121,13 +122,11 @@ def search_product(keyword):
 
 def get_total_product():
     collection = get_product()
-
     return collection.count_documents({})
 
 
 def get_total_stock():
     collection = get_product()
-
     result = collection.aggregate([
         {
             "$group": {
