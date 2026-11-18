@@ -238,6 +238,7 @@ function deleteCartProduct(productId) {
     cartUpdate();
 }
 
+
 function cartUpdate() {
     const table = $$("tableCart");
     const promoSelect = $$("promoSelect");
@@ -406,7 +407,7 @@ function checkout() {
             cartChange = 0;
 
             $$("tableProductCashier").clearAll();
-            $$("tableProductCashier").load("/product");
+            $$("tableProductCashier").load("/product/");
             $$("cartWindow").hide();
         })
         .catch(handleAjaxError);
